@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* DEBUGGING: Extremely obvious RGB gradient - Red to Green to Blue */
+html,
+body {
+  background: linear-gradient(180deg, #FF0000 0%, #00FF00 50%, #0000FF 100%) !important;
+  min-height: 100vh;
+}
