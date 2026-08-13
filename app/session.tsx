@@ -14,10 +14,16 @@ import { useAudio } from "@/lib/audio-context";
 
 import { cn } from "@/lib/utils";
 import * as Haptics from "expo-haptics";
-import { Audio } from "expo-av";
+import {
+  AudioModule,
+  RecordingPresets,
+  setAudioModeAsync,
+  useAudioRecorder,
+} from "expo-audio";
 import Animated, { FadeIn, Layout } from "react-native-reanimated";
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import { getApiBaseUrl } from "@/constants/oauth";
+import * as FileSystem from "expo-file-system/legacy";
 import {
   ScrollView,
   Text,
@@ -38,9 +44,8 @@ export default function SessionScreen() {
   const colors = useColors();
   const audio = useAudio();
 
-  // Audio recording - using expo-av Audio.Recording
-  const recordingRef = useRef<Audio.Recording | null>(null);
-  const recordingStartTimeRef = useRef<number>(0);
+  // Audio recording - using expo-audio
+  const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
 
   const [inputValue, setInputValue] = useState("");
   const [sessionInitialized, setSessionInitialized] = useState(false);
@@ -51,29 +56,26 @@ export default function SessionScreen() {
 
   const scrollViewRef = useRef<ScrollView>(null);
 
-  // Initialize audio mode on mount
+  // Initialize microphone permission and audio mode on mount
   useEffect(() => {
     const initAudio = async () => {
       try {
-        // Request microphone permission
-        const permission = await Audio.requestPermissionsAsync();
+        const permission = await AudioModule.requestRecordingPermissionsAsync();
         if (!permission.granted) {
           setPermissionError("Microphone permission was denied");
           return;
         }
 
-        // Set audio mode for recording
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: true,
-          playsInSilentModeIOS: true,
-          shouldDuckAndroid: true,
-          playThroughEarpieceAndroid: false,
+        await setAudioModeAsync({
+          allowsRecording: true,
+          playsInSilentMode: true,
         });
       } catch (error) {
         console.error("Failed to initialize audio:", error);
         setPermissionError("Failed to initialize audio");
       }
     };
+
     initAudio();
   }, []);
 
@@ -136,74 +138,57 @@ export default function SessionScreen() {
 
   // Handle microphone button press - start/stop recording
   const handleMicrophonePress = async () => {
+     if (isTranscribing) {
+     return;
+    }
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
 
     if (!isListening) {
-      // START RECORDING
       try {
-        const recording = new Audio.Recording();
-        
-        await recording.prepareToRecordAsync({
-          isMeteringEnabled: true,
-          android: {
-            extension: ".m4a",
-            outputFormat: Audio.AndroidOutputFormat.MPEG_4,
-            audioEncoder: Audio.AndroidAudioEncoder.AAC,
-            sampleRate: 44100,
-            numberOfChannels: 1,
-            bitRate: 128000,
-          },
-          ios: {
-            extension: ".m4a",
-            audioQuality: Audio.IOSAudioQuality.HIGH,
-            sampleRate: 44100,
-            numberOfChannels: 1,
-            bitRate: 128000,
-          },
-          web: {} as any,
-        });
-
-        await recording.startAsync();
-        recordingRef.current = recording;
-        recordingStartTimeRef.current = Date.now();
-        setIsListening(true);
         setPermissionError(null);
         setTranscriptionError(null);
+
+        await audioRecorder.prepareToRecordAsync();
+        audioRecorder.record();
+        setIsListening(true);
       } catch (error) {
         console.error("[Session] ❌ Failed to start recording:", error);
         setPermissionError("Failed to start recording");
       }
-    } else {
-      // STOP RECORDING
-      try {
-        if (!recordingRef.current) {
-          setPermissionError("No active recording");
-          return;
-        }
+      return;
+    }
 
-        await recordingRef.current.stopAndUnloadAsync();
-        const uri = recordingRef.current.getURI();
-        recordingRef.current = null;
-        setIsListening(false);
+    try {
+      await audioRecorder.stop();
+      setIsListening(false);
 
-
-        if (uri) {
-          // START TRANSCRIPTION IMMEDIATELY
-          await handleTranscribeRecording(uri);
-        } else {
-          console.error("[Session] ❌ No URI returned from recording");
-          setPermissionError("Failed to get recording URI");
-        }
-
-        if (Platform.OS !== "web") {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        }
-      } catch (error) {
-        console.error("[Session] ❌ Failed to stop recording:", error);
-        setPermissionError("Failed to stop recording");
+      const uri = audioRecorder.uri;
+      if (!uri) {
+        console.error("[Session] ❌ No URI returned from recording");
+        setPermissionError("Failed to get recording URI");
+        return;
       }
+
+      const info = await FileSystem.getInfoAsync(uri);
+      console.log("[Session] Recording file info:", info);
+
+      if (!info.exists || !("size" in info) || !info.size) {
+        throw new Error("Recorded audio file is empty");
+      }
+
+      await handleTranscribeRecording(uri);
+
+      if (Platform.OS !== "web") {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    } catch (error) {
+      console.error("[Session] ❌ Failed to stop recording:", error);
+      setIsListening(false);
+      setPermissionError(
+        error instanceof Error ? error.message : "Failed to stop recording",
+      );
     }
   };
 
@@ -213,35 +198,36 @@ export default function SessionScreen() {
       setIsTranscribing(true);
       setTranscriptionError(null);
 
-      // Read audio file and convert to blob
-      const response = await fetch(recordingUri);
-      const blob = await response.blob();
-      
-      // Create FormData for server transcription endpoint
-      const formData = new FormData();
-      formData.append("file", blob, "recording.m4a");
-
-      // Send to server transcription endpoint (proxies to OpenAI Whisper)
-      const transcriptionResponse = await axios.post(
-        "/api/transcribe",
-        formData,
+      const uploadResult = await FileSystem.uploadAsync(
+        `${getApiBaseUrl()}/api/transcribe`,
+        recordingUri,
         {
-          headers: {
-            // No auth header needed - server handles it
-            "Content-Type": "multipart/form-data",
-          },
-        }
+          httpMethod: "POST",
+          uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+          fieldName: "file",
+          mimeType: "audio/x-m4a",
+        },
       );
 
-      const transcribedText = transcriptionResponse.data.text;
+      if (uploadResult.status < 200 || uploadResult.status >= 300) {
+        throw new Error(
+          `Transcription request failed: ${uploadResult.status} ${uploadResult.body}`,
+        );
+      }
+
+      const transcriptionData = JSON.parse(uploadResult.body) as { text?: string };
+      const transcribedText = transcriptionData.text?.trim();
+
+      if (!transcribedText) {
+        throw new Error("Transcription service returned no text");
+      }
 
       // Place transcribed text into input field
       setInputValue(transcribedText);
-
     } catch (error) {
       console.error("[Session] ❌ Transcription failed:", error);
       setTranscriptionError(
-        error instanceof Error ? error.message : "Transcription failed"
+        error instanceof Error ? error.message : "Transcription failed",
       );
     } finally {
       setIsTranscribing(false);
@@ -257,11 +243,17 @@ export default function SessionScreen() {
   };
 
   return (
-      <ScreenContainer className={theme === "dark" ? "flex-1" : "flex-1 bg-background"}>
-        <Animated.View entering={FadeIn.duration(300)} style={{ flex: 1 }}>
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+  <KeyboardAvoidingView
+    behavior={Platform.OS === "ios" ? "padding" : "height"}
+    style={{ flex: 1 }}
+  >
+    <ScreenContainer
+      edges={["top", "left", "right"]}
+      className={theme === "dark" ? "flex-1" : "flex-1 bg-background"}
+    >
+      <Animated.View entering={FadeIn.duration(300)} style={{ flex: 1 }}>
           {/* Header */}
-          <View className="flex-row items-center justify-between px-4 py-3 border-b border-border pt-40">
+          <View className="flex-row items-center justify-between px-4 py-3 border-b border-border">
             <View className="flex-1">
               <Text className="text-lg font-semibold text-foreground">{t("session.title")}</Text>
               <Text className="text-xs text-muted mt-0.5">
@@ -315,10 +307,26 @@ export default function SessionScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Error message */}
+          {/* Error / free limit message */}
           {error && (
-            <View className="mx-4 mt-3 p-3 bg-error/10 border border-error rounded-lg">
-              <Text className="text-sm text-error">{error}</Text>
+          <View
+             className={
+             error === 'Daily message limit reached. Try again tomorrow.'
+                 ? "mx-4 mt-3 p-3 bg-primary/10 border border-primary rounded-lg"
+                 : "mx-4 mt-3 p-3 bg-error/10 border border-error rounded-lg"
+          }
+        >
+          <Text
+            className={
+            error === 'Daily message limit reached. Try again tomorrow.'
+                 ? "text-sm text-primary font-semibold"
+                 : "text-sm text-error"
+          }
+        >
+          {error === 'Daily message limit reached. Try again tomorrow.'
+                 ? t('session.messageLimitReached')
+                 : error}
+          </Text>
             </View>
           )}
 
@@ -532,8 +540,9 @@ export default function SessionScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </KeyboardAvoidingView>
-        </Animated.View>
-      </ScreenContainer>
+              </Animated.View>
+    </ScreenContainer>
+  </KeyboardAvoidingView>
   );
 }
+

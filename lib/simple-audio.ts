@@ -8,11 +8,16 @@
  * - Free tier daily play limits (for free users only)
  */
 
+import {
+  createAudioPlayer,
+  setAudioModeAsync,
+  type AudioPlayer,
+} from "expo-audio";
 import { validateFreeTierPlayback, recordListeningTime, getListeningSecondsForToday } from "./_core/free-tier-limits";
 
 const DAILY_LIMIT_SECONDS = 1800; // 30 minutes in seconds
 
-let currentAudio: HTMLAudioElement | null = null;
+let currentAudio: AudioPlayer | null = null;
 let currentTrackId: string | null = null;
 let isPlayingState: boolean = false;
 let limitNotificationCallback: ((message: string) => void) | null = null;
@@ -58,7 +63,7 @@ export async function playTrack(trackId: string, url: string, isPremium: boolean
   currentUserIsPremium = isPremium;
 
   // IF same track is already playing, STOP it
-  if (currentTrackId === trackId && currentAudio && !currentAudio.paused) {
+  if (currentTrackId === trackId && currentAudio && isPlayingState) {
     stopSound();
     return;
   }
@@ -75,27 +80,40 @@ export async function playTrack(trackId: string, url: string, isPremium: boolean
     return;
   }
 
-  // STOP any existing audio
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio.src = "";
-    currentAudio = null;
-  }
+  // STOP and release any existing audio
+if (currentAudio) {
+  currentAudio.pause();
+  currentAudio.remove();
+  currentAudio = null;
+}
 
-  // CREATE new audio
-  currentAudio = new Audio(url);
+  // Configure native audio and create a player for the remote URL
+try {
+  await setAudioModeAsync({
+    playsInSilentMode: true,
+  });
+
+  currentAudio = createAudioPlayer(url);
   currentAudio.loop = true;
   currentAudio.volume = 1;
+  currentAudio.play();
 
   // Record when playback starts for listening time tracking
   playStartTime = Date.now();
+} catch (error) {
+  console.error("AUDIO PLAY FAILED", error);
 
-  currentAudio.play().catch(err => {
-    console.error("AUDIO PLAY FAILED", err);
-    isPlayingState = false;
-    playStartTime = null;
-    notifyListeners();
-  });
+  if (currentAudio) {
+    currentAudio.remove();
+    currentAudio = null;
+  }
+
+  currentTrackId = null;
+  isPlayingState = false;
+  playStartTime = null;
+  notifyListeners();
+  throw error;
+}
 
   // SET current track
   currentTrackId = trackId;
@@ -136,10 +154,10 @@ export async function playTrack(trackId: string, url: string, isPremium: boolean
  */
 export function stopSound() {
   if (currentAudio) {
-    currentAudio.pause();
-    currentAudio.src = "";
-    currentAudio = null;
-  }
+  currentAudio.pause();
+  currentAudio.remove();
+  currentAudio = null;
+}
   
   // CLEAR hard auto-stop timer
   if (limitTimer) {

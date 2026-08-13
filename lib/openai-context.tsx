@@ -33,6 +33,7 @@ export interface OpenAIContextType {
   setCurrentMood: (mood: string | null) => void;
   setDailyMessageLimit: (limit: number) => void;
   startNewSession: (mood: string) => void;
+  resetDailyMessageCount: () => Promise<void>;
 }
 
 const OpenAIContext = createContext<OpenAIContextType | undefined>(undefined);
@@ -221,9 +222,21 @@ export function OpenAIProvider({ children }: { children: React.ReactNode }) {
    * Set daily message limit
    */
   const setDailyMessageLimit = useCallback((limit: number) => {
-    setDailyMessageLimitState(limit);
-    AsyncStorage.setItem(STORAGE_KEYS.DAILY_LIMIT, limit.toString());
-  }, []);
+  setDailyMessageLimitState(limit);
+  AsyncStorage.setItem(STORAGE_KEYS.DAILY_LIMIT, limit.toString());
+}, []);
+
+const resetDailyMessageCount = useCallback(async () => {
+  const today = new Date().toDateString();
+
+  setMessageCount(0);
+  setMessagesRemainingToday(dailyMessageLimit);
+  setError(null);
+
+  await AsyncStorage.setItem(STORAGE_KEYS.MESSAGES_TODAY, '0');
+  await AsyncStorage.setItem(STORAGE_KEYS.LAST_MESSAGE_DATE, today);
+}, [dailyMessageLimit]);
+  
 
   /**
    * Start a new session with a specific mood
@@ -245,6 +258,7 @@ export function OpenAIProvider({ children }: { children: React.ReactNode }) {
     clearChat,
     setCurrentMood,
     setDailyMessageLimit,
+    resetDailyMessageCount,
     startNewSession,
   };
 

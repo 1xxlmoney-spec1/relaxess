@@ -146,99 +146,208 @@ export default function RelaxationToolsScreen() {
   };
 
   return (
-    <ScreenContainer className="pt-24">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-        <View className="px-6 pb-20">
-          {/* Header */}
-          <View className="flex-row justify-between items-center mb-8">
-            <Pressable
-              onPress={handleBack}
-              style={({ pressed }) => [
-                {
-                  opacity: pressed ? 0.6 : 1,
-                },
-              ]}
-            >
-              <Text className="text-primary font-semibold">{t("common.back")}</Text>
-            </Pressable>
-            <Text className="text-2xl font-bold text-foreground">
-              {t("tools.title")}
-            </Text>
-            <View style={{ width: 40 }} />
-          </View>
+    <ScreenContainer
+  edges={["left", "right"]}
+  className="pt-0"
+>
+      {/* Fixed Header */}
+<View
+  style={{
+    paddingTop: 52,
+    paddingHorizontal: 24,
+    paddingBottom: 16,
+    backgroundColor: "transparent",
+    zIndex: 10,
+  }}
+>
+  <View className="flex-row justify-between items-center">
+    <Pressable
+      onPress={handleBack}
+      style={({ pressed }) => ({
+        opacity: pressed ? 0.6 : 1,
+      })}
+    >
+      <Text className="text-primary font-semibold">
+        {t("common.back")}
+      </Text>
+    </Pressable>
 
-          {/* Tools Grid - Apple-style spacing */}
-          <View className="gap-4">
+    <Text className="text-2xl font-bold text-foreground">
+      {t("tools.title")}
+    </Text>
+
+    <View style={{ width: 40 }} />
+  </View>
+</View>
+
+{/* Scrollable Content */}
+<ScrollView
+  style={{ flex: 1 }}
+  contentContainerStyle={{
+    paddingHorizontal: 24,
+    paddingBottom: 80,
+  }}
+  contentInsetAdjustmentBehavior="never"
+  automaticallyAdjustContentInsets={false}
+  showsVerticalScrollIndicator={false}
+>
+  <View style={{ paddingTop: 16 }}>
+    {/* Tools Grid */}
+    <View className="gap-4">
             {RELAXATION_TOOLS.map((tool) => {
               const isLocked = tool.isPremium && !session.isPremium;
 
               return (
                 <Pressable
-                  key={tool.id}
-                  onPress={() => handleToolPress(tool)}
-                  style={({ pressed }) => ({
-                    opacity: isLocked ? (pressed ? 0.8 : 0.6) : pressed ? 0.9 : 1,
-                    transform: [{ scale: pressed ? 0.94 : 1 }],
-                    borderRadius: 16,
-                    backgroundColor: isLocked
-                      ? "rgba(0, 0, 0, 0.1)"
-                      : theme === "dark"
-                      ? "rgba(0, 217, 255, 0.12)"
-                      : "rgba(10, 126, 164, 0.10)",
-                    borderWidth: 1.5,
-                    borderColor: isLocked
-                      ? "rgba(0, 0, 0, 0.1)"
-                      : theme === "dark"
-                      ? "rgba(0, 217, 255, 0.40)"
-                      : "rgba(10, 126, 164, 0.35)",
-                    shadowColor: isLocked ? "#000000" : theme === "dark" ? "#00D9FF" : "#0a7ea4",
-                    shadowOpacity: isLocked ? 0.1 : theme === "dark" ? 0.25 : 0.15,
-                    shadowRadius: isLocked ? 4 : 8,
-                    shadowOffset: { width: 0, height: 2 },
-                    elevation: isLocked ? 1 : 4,
-                    padding: 16,
-                  })}
-                >
-                  <View
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: "40%",
-                      backgroundColor: isLocked
-                        ? "rgba(255, 255, 255, 0.02)"
-                        : theme === "dark"
-                        ? "rgba(255, 255, 255, 0.04)"
-                        : "rgba(255, 255, 255, 0.25)",
-                      borderBottomLeftRadius: 20,
-                      borderBottomRightRadius: 20,
-                      opacity: 0.6,
-                      pointerEvents: "none",
-                    }}
-                  />
-                  <View style={{ zIndex: 10, gap: 8 }}>
-                    <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
-                      <View style={{ flex: 1, gap: 8 }}>
-                        <Text style={{ fontSize: 18, fontWeight: "600", color: theme === "dark" ? "#FFFFFF" : colors.foreground }}>
-                          {t(tool.titleKey)}
-                        </Text>
-                        <Text style={{ fontSize: 13, color: theme === "dark" ? "rgba(255, 255, 255, 0.75)" : colors.muted }}>
-                          {t(tool.descriptionKey)}
-                        </Text>
-                      </View>
-                      <Text style={{ fontSize: 28, marginLeft: 12 }}>{tool.icon}</Text>
-                    </View>
+  key={tool.id}
+  onPress={() => handleToolPress(tool)}
+  style={({ pressed }) => ({
+    opacity: pressed ? 0.92 : 1,
+    transform: [{ scale: pressed ? 0.97 : 1 }],
+  })}
+>
+  {({ pressed }) => (
+    <View
+      style={{
+        padding: 16,
+        borderRadius: 16,
+        borderWidth: 2,
+        overflow: "hidden",
 
-                    {isLocked && (
-                      <View style={{ marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.border }}>
-                        <Text style={{ fontSize: 12, fontWeight: "600", color: theme === "dark" ? "#FFB347" : colors.warning }}>
-                          {t("tools.premiumOnly")}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                </Pressable>
+        backgroundColor: pressed
+          ? theme === "dark"
+            ? "rgba(0, 217, 255, 0.12)"
+            : "rgba(10, 126, 164, 0.10)"
+          : theme === "dark"
+            ? "rgba(255, 255, 255, 0.10)"
+            : "rgba(235, 247, 247, 0.96)",
+
+        borderColor: pressed
+  ? theme === "dark"
+    ? "#00D9FF"
+    : "#0A7EA4"
+  : theme === "dark"
+    ? "rgba(255, 255, 255, 0.18)"
+    : "rgba(255, 255, 255, 0.45)",
+
+        shadowColor: pressed
+          ? theme === "dark"
+            ? "#00D9FF"
+            : "#0A7EA4"
+          : "#000000",
+
+        shadowOpacity: pressed
+          ? theme === "dark"
+            ? 0.25
+            : 0.15
+          : theme === "dark"
+            ? 0.15
+            : 0.08,
+
+        shadowRadius: pressed
+          ? theme === "dark"
+            ? 12
+            : 10
+          : theme === "dark"
+            ? 6
+            : 4,
+
+        shadowOffset: {
+          width: 0,
+          height: pressed ? 4 : 2,
+        },
+
+        elevation: pressed
+          ? theme === "dark"
+            ? 8
+            : 6
+          : theme === "dark"
+            ? 2
+            : 1,
+      }}
+    >
+      {/* Glass highlight */}
+      <View
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "40%",
+          backgroundColor: theme === "dark"
+            ? "rgba(255, 255, 255, 0.04)"
+            : "rgba(255, 255, 255, 0.25)",
+          borderBottomLeftRadius: 20,
+          borderBottomRightRadius: 20,
+          opacity: 0.6,
+          pointerEvents: "none",
+        }}
+      />
+
+      <View style={{ zIndex: 10, gap: 8 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+          }}
+        >
+          <View style={{ flex: 1, gap: 8 }}>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "600",
+                color: theme === "dark"
+                  ? "#FFFFFF"
+                  : colors.foreground,
+              }}
+            >
+              {t(tool.titleKey)}
+            </Text>
+
+            <Text
+              style={{
+                fontSize: 13,
+                color: theme === "dark"
+                  ? "rgba(255, 255, 255, 0.75)"
+                  : colors.muted,
+              }}
+            >
+              {t(tool.descriptionKey)}
+            </Text>
+          </View>
+
+          <Text style={{ fontSize: 28, marginLeft: 12 }}>
+            {tool.icon}
+          </Text>
+        </View>
+
+        {isLocked && (
+          <View
+            style={{
+              marginTop: 8,
+              paddingTop: 8,
+              borderTopWidth: 1,
+              borderTopColor: colors.border,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 12,
+                fontWeight: "600",
+                color: theme === "dark"
+                  ? "#FFB347"
+                  : colors.warning,
+              }}
+            >
+              {t("tools.premiumOnly")}
+            </Text>
+          </View>
+        )}
+      </View>
+    </View>
+  )}
+</Pressable>
               );
             })}
           </View>

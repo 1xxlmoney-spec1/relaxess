@@ -190,7 +190,7 @@ export function GlobalAudioBar() {
     <Animated.View
       style={[
         {
-          paddingBottom: Math.max(insets.bottom, 0),
+          paddingBottom: 0,
           overflow: "hidden",
           backgroundColor: "rgba(120, 115, 105, 0.18)",
         },
@@ -203,8 +203,8 @@ export function GlobalAudioBar() {
           alignItems: "center",
           justifyContent: "space-between",
           paddingHorizontal: 20,
-          paddingVertical: 14,
-          minHeight: 72,
+          paddingVertical: 8,
+          minHeight: 56,
           backgroundColor: barBackgroundColor,
           borderTopLeftRadius: 24,
           borderTopRightRadius: 24,

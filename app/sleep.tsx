@@ -17,13 +17,16 @@ import * as Haptics from "expo-haptics";
 import { Audio } from "expo-av";
 import Animated, { FadeIn, Layout } from "react-native-reanimated";
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import { getApiBaseUrl } from "@/constants/oauth";
+import * as FileSystem from "expo-file-system/legacy";
+
 
 export default function SleepModeScreen() {
   const { audioEnabled, language, theme } = useAppContext();
   const { messages, isLoading, error, sendMessage, startNewSession } = useOpenAI();
   const { t } = useTranslation(language);
   const router = useRouter();
+  const colors = useColors();
 
 
   // Audio recording - reuse existing expo-av Audio.Recording system
@@ -183,39 +186,48 @@ export default function SleepModeScreen() {
 
   // Handle transcription of recorded audio - REUSE EXACT LOGIC FROM SESSION SCREEN
   const handleTranscribeRecording = async (recordingUri: string) => {
-    try {
-      setIsTranscribing(true);
-      setTranscriptionError(null);
+  try {
+    setIsTranscribing(true);
+    setTranscriptionError(null);
 
-      const response = await fetch(recordingUri);
-      const blob = await response.blob();
-      
-      const formData = new FormData();
-      formData.append("file", blob, "recording.m4a");
+    const uploadResult = await FileSystem.uploadAsync(
+      `${getApiBaseUrl()}/api/transcribe`,
+      recordingUri,
+      {
+        httpMethod: "POST",
+        uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+        fieldName: "file",
+        mimeType: "audio/x-m4a",
+      }
+    );
 
-      const transcriptionResponse = await axios.post(
-        "/api/transcribe",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+    if (uploadResult.status < 200 || uploadResult.status >= 300) {
+      throw new Error(
+        `Transcription request failed: ${uploadResult.status} ${uploadResult.body}`
       );
-
-      const transcribedText = transcriptionResponse.data.text;
-
-      setInputValue(transcribedText);
-
-    } catch (error) {
-      console.error("[SleepMode] ❌ Transcription failed:", error);
-      setTranscriptionError(
-        error instanceof Error ? error.message : "Transcription failed"
-      );
-    } finally {
-      setIsTranscribing(false);
     }
-  };
+
+    const transcriptionData = JSON.parse(uploadResult.body) as {
+      text?: string;
+    };
+
+    const transcribedText = transcriptionData.text?.trim();
+
+    if (!transcribedText) {
+      throw new Error("Transcription service returned no text");
+    }
+
+    setInputValue(transcribedText);
+  } catch (error) {
+    console.error("[SleepMode] ❌ Transcription failed:", error);
+
+    setTranscriptionError(
+      error instanceof Error ? error.message : "Transcription failed"
+    );
+  } finally {
+    setIsTranscribing(false);
+  }
+};
 
   // Close session
   const handleClose = () => {
@@ -226,68 +238,100 @@ export default function SleepModeScreen() {
   };
 
   return (
-    <ScreenContainer className="flex-1 bg-background">
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+  <KeyboardAvoidingView
+    behavior={Platform.OS === "ios" ? "padding" : "height"}
+    style={{ flex: 1 }}
+  >
+    <ScreenContainer
+      edges={["top", "left", "right"]}
+      className="flex-1 bg-background"
+    >
         {/* Header */}
-        <View className="flex-row items-center justify-between px-4 py-3 border-b border-border pt-40">
-          <View className="flex-1">
-            <Text className="text-lg font-semibold text-foreground">{t('sleep.title')}</Text>
-            <Text className="text-xs text-muted mt-0.5">
-              {t('sleep.subtitle')}
-            </Text>
-          </View>
+        <View
+  style={{
+    paddingTop: 52,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor:
+  theme === "dark"
+    ? "rgba(255,255,255,0.10)"
+    : "rgba(10,126,164,0.12)",
+  }}
+>
+  <View
+    style={{
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    }}
+  >
+    <View style={{ width: 44 }} />
 
-          {/* Audio indicator */}
-          {audioEnabled && (
-            <View className="mr-3 px-2 py-1 bg-primary/20 rounded-full">
-              <Text className="text-xs text-foreground font-semibold">🔊</Text>
-            </View>
-          )}
+    <View
+  style={{
+    flex: 1,
+    alignItems: "center",
+    marginLeft: -10,
+  }}
+>
+      <Text className="text-2xl font-bold text-foreground">
+        {t("sleep.title")}
+      </Text>
 
-          {/* Close button */}
-          <Pressable
-            onPress={handleClose}
-            style={({ pressed }) => ({
-              opacity: pressed ? 0.9 : 1,
-              transform: [{ scale: pressed ? 0.94 : 1 }],
-              borderRadius: 12,
-              backgroundColor: theme === "dark"
-                ? "rgba(0, 217, 255, 0.12)"
-                : "rgba(10, 126, 164, 0.10)",
-              borderWidth: 1.5,
-              borderColor: theme === "dark"
-                ? "rgba(0, 217, 255, 0.40)"
-                : "rgba(10, 126, 164, 0.35)",
-              shadowColor: theme === "dark" ? "#00D9FF" : "#0a7ea4",
-              shadowOpacity: theme === "dark" ? 0.25 : 0.15,
-              shadowRadius: 8,
-              shadowOffset: { width: 0, height: 2 },
-              elevation: 4,
-              width: 44,
-              height: 44,
-              justifyContent: "center",
-              alignItems: "center",
-            })}
-          >
-            <View
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                height: "40%",
-                backgroundColor: theme === "dark"
-                  ? "rgba(255, 255, 255, 0.04)"
-                  : "rgba(255, 255, 255, 0.25)",
-                borderBottomLeftRadius: 12,
-                borderBottomRightRadius: 12,
-                opacity: 0.6,
-                pointerEvents: "none",
-              }}
-            />
-            <Text style={{ fontSize: 20, zIndex: 10 }}>❌</Text>
-          </Pressable>
-        </View>
+      <Text className="text-xs text-muted mt-0.5">
+        {t("sleep.subtitle")}
+      </Text>
+    </View>
+
+    <TouchableOpacity
+  onPress={handleClose}
+  style={{
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor:
+      theme === "dark"
+        ? "rgba(0, 217, 255, 0.12)"
+        : "rgba(10, 126, 164, 0.10)",
+    borderWidth: 1.5,
+    borderColor:
+      theme === "dark"
+        ? "rgba(0, 217, 255, 0.40)"
+        : "rgba(10, 126, 164, 0.35)",
+    shadowColor: theme === "dark" ? "#00D9FF" : "#0a7ea4",
+    shadowOpacity: theme === "dark" ? 0.25 : 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  }}
+>
+  <View
+    style={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      height: "40%",
+      backgroundColor:
+        theme === "dark"
+          ? "rgba(255, 255, 255, 0.04)"
+          : "rgba(255, 255, 255, 0.25)",
+      borderBottomLeftRadius: 20,
+      borderBottomRightRadius: 20,
+      opacity: 0.6,
+      pointerEvents: "none",
+    }}
+  />
+
+  <Text style={{ fontSize: 22, lineHeight: 26, zIndex: 10 }}>
+    ❌
+  </Text>
+</TouchableOpacity>
+  </View>
+</View>
 
         {/* Error message */}
         {error && (
@@ -399,129 +443,141 @@ export default function SleepModeScreen() {
               multiline
               maxLength={1000}
             />
-            <Pressable
-              onPress={handleMicrophonePress}
-              disabled={isLoading}
-              style={({ pressed }) => ({
-                opacity: isLoading ? 0.6 : pressed ? 0.9 : 1,
-                transform: [{ scale: isLoading ? 1 : pressed ? 0.94 : 1 }],
-                borderRadius: 12,
-                backgroundColor: isListening
-                  ? theme === "dark"
-                    ? "rgba(0, 217, 255, 0.25)"
-                    : "rgba(10, 126, 164, 0.20)"
-                  : theme === "dark"
-                  ? "rgba(0, 217, 255, 0.12)"
-                  : "rgba(10, 126, 164, 0.10)",
-                borderWidth: 1.5,
-                borderColor: isListening
-                  ? theme === "dark"
-                    ? "rgba(0, 217, 255, 0.60)"
-                    : "rgba(10, 126, 164, 0.50)"
-                  : theme === "dark"
-                  ? "rgba(0, 217, 255, 0.40)"
-                  : "rgba(10, 126, 164, 0.35)",
-                shadowColor: isListening
-                  ? theme === "dark"
-                    ? "#00D9FF"
-                    : "#0a7ea4"
-                  : theme === "dark"
-                  ? "#00D9FF"
-                  : "#0a7ea4",
-                shadowOpacity: isListening
-                  ? theme === "dark"
-                    ? 0.35
-                    : 0.25
-                  : theme === "dark"
-                  ? 0.25
-                  : 0.15,
-                shadowRadius: 8,
-                shadowOffset: { width: 0, height: 2 },
-                elevation: 4,
-                width: 44,
-                height: 44,
-                justifyContent: "center",
-                alignItems: "center",
-              })}
-            >
-              <View
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: "40%",
-                  backgroundColor: theme === "dark"
-                    ? "rgba(255, 255, 255, 0.04)"
-                    : "rgba(255, 255, 255, 0.25)",
-                  borderBottomLeftRadius: 12,
-                  borderBottomRightRadius: 12,
-                  opacity: 0.6,
-                  pointerEvents: "none",
-                }}
-              />
-              <Text style={{ fontSize: 20, zIndex: 10 }}>🎤</Text>
-            </Pressable>
-            <Pressable
-              onPress={handleSend}
-              disabled={isLoading || !inputValue.trim()}
-              style={({ pressed }) => ({
-                opacity: isLoading || !inputValue.trim() ? 0.6 : pressed ? 0.9 : 1,
-                transform: [{ scale: isLoading || !inputValue.trim() ? 1 : pressed ? 0.94 : 1 }],
-                borderRadius: 12,
-                backgroundColor: isLoading || !inputValue.trim()
-                  ? theme === "dark"
-                    ? "rgba(0, 217, 255, 0.08)"
-                    : "rgba(10, 126, 164, 0.06)"
-                  : theme === "dark"
-                  ? "rgba(0, 217, 255, 0.12)"
-                  : "rgba(10, 126, 164, 0.10)",
-                borderWidth: 1.5,
-                borderColor: isLoading || !inputValue.trim()
-                  ? theme === "dark"
-                    ? "rgba(0, 217, 255, 0.20)"
-                    : "rgba(10, 126, 164, 0.15)"
-                  : theme === "dark"
-                  ? "rgba(0, 217, 255, 0.40)"
-                  : "rgba(10, 126, 164, 0.35)",
-                shadowColor: theme === "dark" ? "#00D9FF" : "#0a7ea4",
-                shadowOpacity: isLoading || !inputValue.trim()
-                  ? theme === "dark"
-                    ? 0.10
-                    : 0.05
-                  : theme === "dark"
-                  ? 0.25
-                  : 0.15,
-                shadowRadius: 8,
-                shadowOffset: { width: 0, height: 2 },
-                elevation: 4,
-                width: 44,
-                height: 44,
-                justifyContent: "center",
-                alignItems: "center",
-              })}
-            >
-              <View
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: "40%",
-                  backgroundColor: theme === "dark"
-                    ? "rgba(255, 255, 255, 0.04)"
-                    : "rgba(255, 255, 255, 0.25)",
-                  borderBottomLeftRadius: 12,
-                  borderBottomRightRadius: 12,
-                  opacity: 0.6,
-                  pointerEvents: "none",
-                }}
-              />
-              <Text style={{ fontSize: 18, zIndex: 10 }}>{isLoading ? "⏳" : "📤"}</Text>
-            </Pressable>
+            <TouchableOpacity
+  onPress={handleMicrophonePress}
+  disabled={isLoading}
+  style={{
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: isListening
+      ? colors.primary
+      : theme === "dark"
+      ? "rgba(0, 217, 255, 0.12)"
+      : "rgba(10, 126, 164, 0.10)",
+    borderWidth: 1.5,
+    borderColor: isListening
+      ? colors.primary
+      : theme === "dark"
+      ? "rgba(0, 217, 255, 0.40)"
+      : "rgba(10, 126, 164, 0.35)",
+    shadowColor: isListening
+      ? colors.primary
+      : theme === "dark"
+      ? "#00D9FF"
+      : "#0a7ea4",
+    shadowOpacity: isListening
+      ? 0.4
+      : theme === "dark"
+      ? 0.25
+      : 0.15,
+    shadowRadius: isListening ? 12 : 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: isListening ? 6 : 4,
+    opacity: isLoading ? 0.5 : 1,
+  }}
+>
+  <View
+    style={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      height: "40%",
+      backgroundColor: isListening
+        ? "rgba(255, 255, 255, 0.2)"
+        : theme === "dark"
+        ? "rgba(255, 255, 255, 0.04)"
+        : "rgba(255, 255, 255, 0.25)",
+      borderBottomLeftRadius: 20,
+      borderBottomRightRadius: 20,
+      opacity: 0.6,
+      pointerEvents: "none",
+    }}
+  />
+
+  <Text style={{ fontSize: 20, lineHeight: 24, zIndex: 10 }}>
+    🎤
+  </Text>
+</TouchableOpacity>
+            <TouchableOpacity
+  onPress={handleSend}
+  disabled={isLoading || !inputValue.trim()}
+  style={{
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor:
+      isLoading || !inputValue.trim()
+        ? "rgba(0, 0, 0, 0.2)"
+        : colors.primary,
+    borderWidth: 1.5,
+    borderColor:
+      isLoading || !inputValue.trim()
+        ? "rgba(0, 0, 0, 0.1)"
+        : colors.primary,
+    shadowColor:
+      isLoading || !inputValue.trim()
+        ? "#000000"
+        : colors.primary,
+    shadowOpacity:
+      isLoading || !inputValue.trim()
+        ? 0.1
+        : 0.3,
+    shadowRadius:
+      isLoading || !inputValue.trim()
+        ? 4
+        : 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation:
+      isLoading || !inputValue.trim()
+        ? 1
+        : 4,
+    opacity:
+      isLoading || !inputValue.trim()
+        ? 0.6
+        : 1,
+  }}
+>
+  <View
+    style={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      height: "40%",
+      backgroundColor:
+        isLoading || !inputValue.trim()
+          ? "rgba(255, 255, 255, 0.02)"
+          : "rgba(255, 255, 255, 0.2)",
+      borderBottomLeftRadius: 20,
+      borderBottomRightRadius: 20,
+      opacity: 0.6,
+      pointerEvents: "none",
+    }}
+  />
+
+  <Text
+    style={{
+      fontSize: 20,
+      lineHeight: 24,
+      zIndex: 10,
+      color:
+        isLoading || !inputValue.trim()
+          ? colors.muted
+          : "#ffffff",
+    }}
+  >
+    {isLoading ? "⏳" : "📤"}
+  </Text>
+</TouchableOpacity>
           </View>
         </View>
-      </KeyboardAvoidingView>
-    </ScreenContainer>
+      </ScreenContainer>
+    </KeyboardAvoidingView>
   );
 }

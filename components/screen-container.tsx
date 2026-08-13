@@ -169,19 +169,23 @@ export function ScreenContainer({
       )}
 
       <SafeAreaView
-        edges={edges}
-        style={{ flex: 1, backgroundColor: "transparent" }}
-        className={cn("flex-1", safeAreaClassName)}
-        onLayout={({ nativeEvent }) => console.log("LAYOUT ScreenContainer SafeAreaView", nativeEvent.layout)}
-      >
-        <View
-          className={cn("flex-1 pt-6", className)}
-          style={{ backgroundColor: "transparent" }}
-          onLayout={({ nativeEvent }) => console.log("LAYOUT ScreenContainer InnerView", nativeEvent.layout)}
-        >
-          {children}
-        </View>
-      </SafeAreaView>
+  edges={edges}
+  style={{ flex: 1, backgroundColor: "transparent" }}
+  className={cn("flex-1", safeAreaClassName)}
+  onLayout={({ nativeEvent }) =>
+    console.log("LAYOUT ScreenContainer SafeAreaView", nativeEvent.layout)
+  }
+>
+  <View
+    className={cn("flex-1", className)}
+    style={[{ backgroundColor: "transparent" }, style]}
+    onLayout={({ nativeEvent }) =>
+      console.log("LAYOUT ScreenContainer InnerView", nativeEvent.layout)
+    }
+  >
+    {children}
+  </View>
+</SafeAreaView>
     </View>
   );
 }

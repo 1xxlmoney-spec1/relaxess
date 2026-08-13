@@ -1,9 +1,8 @@
 import { Router, Request, Response } from "express";
 import multer from "multer";
 import { invokeLLM, type Message, type InvokeParams } from "./llm";
-import { transcribeAudio } from "./voiceTranscription";
-import { storagePut } from "../storage";
 import { z } from "zod";
+import { ENV } from "./env";
 
 const chatRouter = Router();
 
@@ -120,6 +119,7 @@ const upload = multer({
       "audio/wav",
       "audio/mp4",
       "audio/m4a",
+      "audio/x-m4a",
       "audio/ogg",
       "audio/webm",
     ];
@@ -152,34 +152,60 @@ chatRouter.post("/transcribe", upload.single("file"), async (req: any, res: Resp
       mimetype: req.file.mimetype,
     });
 
-    // Upload audio to storage to get a URL
-    const storageResult = await storagePut(
-      `audio-${Date.now()}.${getFileExtensionFromMime(req.file.mimetype)}`,
-      req.file.buffer,
-      req.file.mimetype
-    );
+    // Send the uploaded audio directly to OpenAI
+if (!ENV.forgeApiKey) {
+  throw new Error("OPENAI_API_KEY is not configured");
+}
 
-    const audioUrl = storageResult.url;
-    console.log("[chat-router] Audio uploaded to storage:", audioUrl);
+const formData = new FormData();
 
-    // Transcribe audio using server-side service
-    const result = await transcribeAudio({
-      audioUrl: audioUrl,
-      language: "en",
-    });
+const audioBlob = new Blob(
+  [new Uint8Array(req.file.buffer)],
+  { type: req.file.mimetype }
+);
 
-    // Check for error response
-    if ("error" in result) {
-      return res.status(400).json({
-        error: result.error,
-        code: result.code,
-      });
-    }
+formData.append(
+  "file",
+  audioBlob,
+  req.file.originalname || "recording.m4a"
+);
 
-    // Return transcribed text
-    return res.json({
-      text: result.text,
-    });
+formData.append("model", "gpt-4o-mini-transcribe");
+
+const apiBaseUrl = (
+  ENV.forgeApiUrl || "https://api.openai.com"
+).replace(/\/$/, "");
+
+const transcriptionResponse = await fetch(
+  `${apiBaseUrl}/v1/audio/transcriptions`,
+  {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${ENV.forgeApiKey}`,
+    },
+    body: formData,
+  }
+);
+
+if (!transcriptionResponse.ok) {
+  const details = await transcriptionResponse.text();
+
+  throw new Error(
+    `OpenAI transcription failed: ${transcriptionResponse.status} ${details}`
+  );
+}
+
+const transcription = (await transcriptionResponse.json()) as {
+  text?: string;
+};
+
+if (!transcription.text) {
+  throw new Error("OpenAI returned no transcription text");
+}
+
+return res.json({
+  text: transcription.text,
+});
   } catch (error) {
     console.error("[chat-router] Transcription error:", error);
 
@@ -212,6 +238,7 @@ function getFileExtensionFromMime(mimeType: string): string {
     "audio/wav": "wav",
     "audio/mp4": "mp4",
     "audio/m4a": "m4a",
+    "audio/x-m4a": "m4a",
     "audio/ogg": "ogg",
     "audio/webm": "webm",
   };
@@ -219,3 +246,5 @@ function getFileExtensionFromMime(mimeType: string): string {
 }
 
 export { chatRouter };
+
+

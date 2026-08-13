@@ -4,6 +4,7 @@ const path = require("path");
 
 const config = getDefaultConfig(__dirname);
 
+
 // Redirect react-native-purchases to a no-op web stub on web.
 // The native library contains StoreKit code that crashes the web bundle.
 // All IAP logic in iap-service.ts is already guarded by Platform.OS === 'ios'.

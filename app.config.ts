@@ -1,4 +1,4 @@
-// Load environment variables with proper priority (system > .env)
+﻿// Load environment variables with proper priority (system > .env)
 import "./scripts/load-env.js";
 import type { ExpoConfig } from "expo/config";
 
@@ -92,6 +92,7 @@ const config: ExpoConfig = {
   },
   plugins: [
     "expo-router",
+    "expo-asset",
     [
       "expo-audio",
       {
@@ -134,3 +135,4 @@ const config: ExpoConfig = {
 };
 
 export default config;
+

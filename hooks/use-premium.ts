@@ -52,7 +52,7 @@ export interface UsePremiumState {
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function usePremium(): UsePremiumState {
-  const { setPremium } = useAppContext();
+  const { session, setPremium } = useAppContext();
 
   const [products, setProducts] = useState<IAPProducts | null>(null);
   const [entitlement, setEntitlement] = useState<PremiumEntitlement>(DEFAULT_ENTITLEMENT);
@@ -64,16 +64,24 @@ export function usePremium(): UsePremiumState {
   // We call it whenever the verified entitlement changes.
 
   const syncEntitlementToContext = useCallback(
-    async (newEntitlement: PremiumEntitlement) => {
-      setEntitlement(newEntitlement);
-      if (newEntitlement.isActive) {
-        await setPremium(true, newEntitlement.expiresAt ?? undefined);
-      } else {
-        await setPremium(false);
-      }
-    },
-    [setPremium]
-  );
+  async (newEntitlement: PremiumEntitlement) => {
+    setEntitlement(newEntitlement);
+
+    if (newEntitlement.isActive) {
+      await setPremium(true, newEntitlement.expiresAt ?? undefined);
+      return;
+    }
+
+    // In development, preserve Premium enabled through DevTestingPanel.
+    // In TestFlight and App Store, __DEV__ is false, so real IAP status wins.
+    if (__DEV__ && session.isPremium) {
+      return;
+    }
+
+    await setPremium(false);
+  },
+  [session.isPremium, setPremium]
+);
 
   // ── Initialize IAP and load products ──────────────────────────────────────
 

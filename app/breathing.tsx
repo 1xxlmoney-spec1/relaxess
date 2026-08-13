@@ -1,4 +1,10 @@
-import { View, Text, Pressable, Platform } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  Platform,
+  TouchableOpacity,
+} from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAppContext } from "@/lib/app-context";
 import { useTranslation } from "@/lib/i18n";
@@ -53,14 +59,19 @@ export default function BreathingScreen() {
   const scale = useSharedValue(1);
   const opacity = useSharedValue(0.6);
   const completionMessageOpacity = useSharedValue(0);
-
+  const instructionOpacity = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: scale.value }],
       opacity: opacity.value,
     };
   });
-
+  const instructionAnimatedStyle = useAnimatedStyle(() => ({
+  opacity: instructionOpacity.value,
+  }));
+  const completionAnimatedStyle = useAnimatedStyle(() => ({
+  opacity: completionMessageOpacity.value,
+  }));
   const currentCycle = BREATHING_CYCLES[currentCycleIndex];
   const isCompleted = cycleCount >= 10;
 
@@ -115,7 +126,7 @@ export default function BreathingScreen() {
         phaseTime += BREATHING_CYCLES[i].duration;
       }
 
-      cycleIndexRef.current = newCycleIndex;
+      
 
       const newCycleCount = Math.floor(
         elapsed / TOTAL_CYCLE_DURATION
@@ -139,7 +150,23 @@ export default function BreathingScreen() {
         }
       }
 
-      setCurrentCycleIndex(newCycleIndex);
+      if (newCycleIndex !== cycleIndexRef.current) {
+  cycleIndexRef.current = newCycleIndex;
+
+  instructionOpacity.value = withTiming(0, {
+    duration: 250,
+    easing: Easing.inOut(Easing.ease),
+  });
+
+  setTimeout(() => {
+    setCurrentCycleIndex(newCycleIndex);
+
+    instructionOpacity.value = withTiming(1, {
+      duration: 350,
+      easing: Easing.inOut(Easing.ease),
+    });
+  }, 250);
+}
     };
 
     startAnimation();
@@ -198,7 +225,7 @@ export default function BreathingScreen() {
 
   const handleRepeat = () => {
     setCycleCount(0);
-
+    completionMessageOpacity.value = 0;
     cycleCountRef.current = 0;
 
     sessionStartTimeRef.current = Date.now();
@@ -215,26 +242,110 @@ export default function BreathingScreen() {
   return (
     <ScreenContainer className="bg-background">
       <View className="flex-1 justify-between px-6 py-8">
+        
         {/* Header */}
-        <View className="items-center gap-4 pt-24">
-          <Text className="text-3xl font-bold text-foreground">
-            {t("breathing.title")}
-          </Text>
-          {!isCompleted && (
-            <Text className="text-sm text-muted">
-              {t('breathing.completedCycles', { count: cycleCount.toString() })}
-            </Text>
-          )}
-        </View>
+<View
+  style={{
+    paddingTop: 52,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor:
+      theme === "dark"
+        ? "rgba(255,255,255,0.10)"
+        : "rgba(10,126,164,0.12)",
+  }}
+>
+  <View
+    style={{
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    }}
+  >
+    <View style={{ width: 44 }} />
+
+    <View
+      style={{
+        flex: 1,
+        alignItems: "center",
+        marginLeft: -10,
+      }}
+    >
+      <Text className="text-2xl font-bold text-foreground">
+        {t("breathing.title")}
+      </Text>
+
+      {!isCompleted && (
+        <Text className="text-sm text-muted mt-1">
+          {t("breathing.completedCycles", {
+            count: cycleCount.toString(),
+          })}
+        </Text>
+      )}
+    </View>
+
+    <TouchableOpacity
+      onPress={handleExit}
+      style={{
+        width: 44,
+        height: 44,
+        borderRadius: 12,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor:
+          theme === "dark"
+            ? "rgba(0, 217, 255, 0.12)"
+            : "rgba(10, 126, 164, 0.10)",
+        borderWidth: 1.5,
+        borderColor:
+          theme === "dark"
+            ? "rgba(0, 217, 255, 0.40)"
+            : "rgba(10, 126, 164, 0.35)",
+        shadowColor: theme === "dark" ? "#00D9FF" : "#0a7ea4",
+        shadowOpacity: theme === "dark" ? 0.25 : 0.15,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 2 },
+        elevation: 4,
+      }}
+    >
+      <View
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "40%",
+          backgroundColor:
+            theme === "dark"
+              ? "rgba(255, 255, 255, 0.04)"
+              : "rgba(255, 255, 255, 0.25)",
+          borderBottomLeftRadius: 20,
+          borderBottomRightRadius: 20,
+          opacity: 0.6,
+          pointerEvents: "none",
+        }}
+      />
+
+      <Text style={{ fontSize: 22, lineHeight: 26, zIndex: 10 }}>
+        ❌
+      </Text>
+    </TouchableOpacity>
+  </View>
+</View>
 
         {/* Animated Circle or Completion Message */}
         {isCompleted ? (
           <Animated.View
             style={[
-              { flex: 1, justifyContent: "center", alignItems: "center", gap: 24 },
-              { opacity: completionMessageOpacity.value },
-            ]}
-          >
+         {
+             flex: 1,
+             justifyContent: "center",
+             alignItems: "center",
+             gap: 24,
+          },
+          completionAnimatedStyle,
+       ]}
+      >
             <Text className="text-4xl font-bold text-foreground text-center">
               {t('breathing.excellent')}
             </Text>
@@ -243,7 +354,10 @@ export default function BreathingScreen() {
             </Text>
           </Animated.View>
         ) : (
-          <View className="items-center justify-center flex-1 gap-8">
+          <View
+                 className="items-center justify-center flex-1"
+                 style={{ gap: 56 }}
+          >
             <Animated.View
               style={[
                 {
@@ -257,14 +371,24 @@ export default function BreathingScreen() {
             />
 
             {/* Instruction Text */}
-            <View className="items-center gap-2">
-              <Text className="text-2xl font-bold text-foreground text-center">
-                {t(currentCycle.label)}
-              </Text>
-              <Text className="text-sm text-muted">
-                {Math.ceil(currentCycle.duration / 1000)} sec
-              </Text>
-            </View>
+            <Animated.View
+              className="items-center gap-2"
+              style={[
+                {
+                  height: 72,
+                  justifyContent: "center",
+                },
+                instructionAnimatedStyle,
+              ]}
+           >
+            <Text className="text-2xl font-bold text-foreground text-center">
+              {t(currentCycle.label)}
+            </Text>
+
+            <Text className="text-sm text-muted">
+              {Math.ceil(currentCycle.duration / 1000)} sec
+          </Text>
+          </Animated.View>
           </View>
         )}
 
@@ -290,103 +414,10 @@ export default function BreathingScreen() {
                     </Text>
                   </View>
                 </Pressable>
-                <Pressable
-                  onPress={handleExit}
-                  style={({ pressed }) => [
-                    { flex: 1 },
-                    {
-                      opacity: pressed ? 0.9 : 1,
-                      transform: [{ scale: pressed ? 0.94 : 1 }],
-                      borderRadius: 16,
-                      backgroundColor: theme === "dark"
-                        ? "rgba(0, 217, 255, 0.12)"
-                        : "rgba(10, 126, 164, 0.10)",
-                      borderWidth: 1.5,
-                      borderColor: theme === "dark"
-                        ? "rgba(0, 217, 255, 0.40)"
-                        : "rgba(10, 126, 164, 0.35)",
-                      shadowColor: theme === "dark" ? "#00D9FF" : "#0a7ea4",
-                      shadowOpacity: theme === "dark" ? 0.25 : 0.15,
-                      shadowRadius: 8,
-                      shadowOffset: { width: 0, height: 2 },
-                      elevation: 4,
-                      paddingVertical: 16,
-                      paddingHorizontal: 24,
-                      justifyContent: "center",
-                      alignItems: "center",
-                    },
-                  ]}
-                >
-                  <View
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: "40%",
-                      backgroundColor: theme === "dark"
-                        ? "rgba(255, 255, 255, 0.04)"
-                        : "rgba(255, 255, 255, 0.25)",
-                      borderBottomLeftRadius: 20,
-                      borderBottomRightRadius: 20,
-                      opacity: 0.6,
-                      pointerEvents: "none",
-                    }}
-                  />
-                  <Text style={{ fontSize: 16, fontWeight: "600", color: theme === "dark" ? "#FFFFFF" : colors.foreground, zIndex: 10 }}>
-                    {t("breathing.exit")}
-                  </Text>
-                </Pressable>
+                
               </View>
             </>
-          ) : (
-            <Pressable
-              onPress={handleExit}
-              style={({ pressed }) => [
-                {
-                  opacity: pressed ? 0.9 : 1,
-                  transform: [{ scale: pressed ? 0.94 : 1 }],
-                  borderRadius: 16,
-                  backgroundColor: theme === "dark"
-                    ? "rgba(0, 217, 255, 0.12)"
-                    : "rgba(10, 126, 164, 0.10)",
-                  borderWidth: 1.5,
-                  borderColor: theme === "dark"
-                    ? "rgba(0, 217, 255, 0.40)"
-                    : "rgba(10, 126, 164, 0.35)",
-                  shadowColor: theme === "dark" ? "#00D9FF" : "#0a7ea4",
-                  shadowOpacity: theme === "dark" ? 0.25 : 0.15,
-                  shadowRadius: 8,
-                  shadowOffset: { width: 0, height: 2 },
-                  elevation: 4,
-                  paddingVertical: 16,
-                  paddingHorizontal: 24,
-                  justifyContent: "center",
-                  alignItems: "center",
-                },
-              ]}
-            >
-              <View
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: "40%",
-                  backgroundColor: theme === "dark"
-                    ? "rgba(255, 255, 255, 0.04)"
-                    : "rgba(255, 255, 255, 0.25)",
-                  borderBottomLeftRadius: 20,
-                  borderBottomRightRadius: 20,
-                  opacity: 0.6,
-                  pointerEvents: "none",
-                }}
-              />
-              <Text style={{ fontSize: 16, fontWeight: "600", color: theme === "dark" ? "#FFFFFF" : colors.foreground, zIndex: 10 }}>
-                {t("breathing.exit")}
-              </Text>
-            </Pressable>
-          )}
+          ) : null}
         </View>
       </View>
     </ScreenContainer>

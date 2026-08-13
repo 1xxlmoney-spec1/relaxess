@@ -101,6 +101,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'grounding.step5': 'Name 1 emotion you currently feel',
     'grounding.progress': 'Step {{current}} of {{total}}',
     'grounding.subtitle': '5–4–3–2–1 technique for anxiety relief',
+    'grounding.instruction':
+    'Grounding helps bring your attention back to the present moment. Move through each step one by one. Take your time and type what you notice around you. There are no right or wrong answers. Simply observe your surroundings and your feelings.',
     'grounding.completionTitle': 'You are grounded.',
     'grounding.completionMessage': 'Take a moment and notice how you feel now.',
     'grounding.repeatExercise': 'Repeat Exercise',
@@ -177,6 +179,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'settings.disclaimer': 'This app provides emotional support and relaxation and is not a medical service.',
     'settings.about': 'About',
     'settings.support': 'Support',
+    'settings.legal': 'Legal',
+    'settings.privacyPolicy': 'Privacy Policy',
+    'settings.termsOfUse': 'Terms of Use',
 
     // Premium
     'premium.title': 'Premium Features',
@@ -350,6 +355,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'grounding.step5': 'Nombra 1 emoción que sientas ahora',
     'grounding.progress': 'Paso {{current}} de {{total}}',
     'grounding.subtitle': 'Técnica 5–4–3–2–1 para aliviar la ansiedad',
+    'grounding.instruction':
+    'Este ejercicio te ayuda a volver al momento presente. Completa cada paso con calma y escribe lo que observes a tu alrededor. No hay respuestas correctas o incorrectas.',
     'grounding.completionTitle': 'Estás anclado.',
     'grounding.completionMessage': 'Tómate un momento y observa cómo te sientes ahora.',
     'grounding.repeatExercise': 'Repetir Ejercicio',
@@ -389,6 +396,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'settings.disclaimer': 'Esta aplicación proporciona apoyo emocional y relajación y no es un servicio médico.',
     'settings.about': 'Acerca de',
     'settings.support': 'Soporte',
+    'settings.legal': 'Información legal',
+    'settings.privacyPolicy': 'Política de Privacidad',
+    'settings.termsOfUse': 'Términos de Uso',
 
     // Premium
     'premium.title': 'Características Premium',
@@ -596,6 +606,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'grounding.step5': 'Nenne 1 Emotion, die du gerade fühlst',
     'grounding.progress': 'Schritt {{current}} von {{total}}',
     'grounding.subtitle': '5–4–3–2–1 Technik zur Angstlinderung',
+    'grounding.instruction':
+    'Diese Übung hilft dir, deine Aufmerksamkeit wieder auf den gegenwärtigen Moment zu richten. Gehe Schritt für Schritt vor und schreibe auf, was du wahrnimmst. Es gibt keine falschen Antworten.',
     'grounding.completionTitle': 'Du bist geerdet.',
     'grounding.completionMessage': 'Nimm dir einen Moment Zeit und beobachte, wie du dich jetzt fühlst.',
     'grounding.repeatExercise': 'Übung Wiederholen',
@@ -635,6 +647,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'settings.disclaimer': 'Diese App bietet emotionale Unterstützung und Entspannung und ist kein medizinischer Dienst.',
     'settings.about': 'Über',
     'settings.support': 'Unterstützung',
+    'settings.legal': 'Rechtliches',
+    'settings.privacyPolicy': 'Datenschutzerklärung',
+    'settings.termsOfUse': 'Nutzungsbedingungen',
 
     // Premium
     'premium.title': 'Premium-Funktionen',
@@ -842,6 +857,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'grounding.step5': 'Nomme 1 émotion que tu ressens actuellement',
     'grounding.progress': 'Étape {{current}} sur {{total}}',
     'grounding.subtitle': 'Technique 5–4–3–2–1 pour soulager l\'anxiété',
+    'grounding.instruction':
+    'Cet exercice vous aide à revenir au moment présent. Avancez étape par étape et notez ce que vous remarquez autour de vous. Il n’existe pas de bonne ou de mauvaise réponse.',
     'grounding.completionTitle': 'Tu es ancré.',
     'grounding.completionMessage': 'Prends un moment et observe comment tu te sens maintenant.',
     'grounding.repeatExercise': 'Répéter l\'Exercice',
@@ -881,6 +898,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'settings.disclaimer': 'Cette application fournit un soutien émotionnel et une relaxation et n\'est pas un service médical.',
     'settings.about': 'À propos',
     'settings.support': 'Support',
+    'settings.legal': 'Mentions légales',
+    'settings.privacyPolicy': 'Politique de confidentialité',
+    'settings.termsOfUse': 'Conditions d’utilisation',
 
     // Premium
     'premium.title': 'Fonctionnalités Premium',
@@ -1088,6 +1108,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'grounding.step5': 'Nomeie 1 emoção que você está sentindo agora',
     'grounding.progress': 'Passo {{current}} de {{total}}',
     'grounding.subtitle': 'Técnica 5–4–3–2–1 para aliviar a ansiedade',
+    'grounding.instruction':
+    'Este exercício ajuda você a voltar ao momento presente. Complete cada etapa com calma e escreva o que percebe ao seu redor. Não existem respostas certas ou erradas.',
     'grounding.completionTitle': 'Você está ancorado.',
     'grounding.completionMessage': 'Tire um momento e observe como você se sente agora.',
     'grounding.repeatExercise': 'Repetir Exercício',
@@ -1127,6 +1149,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'settings.disclaimer': 'Este aplicativo fornece suporte emocional e relaxamento e não é um serviço médico.',
     'settings.about': 'Sobre',
     'settings.support': 'Suporte',
+    'settings.legal': 'Informações legais',
+    'settings.privacyPolicy': 'Política de Privacidade',
+    'settings.termsOfUse': 'Termos de Uso',
 
     // Premium
     'premium.title': 'Recursos Premium',
@@ -1333,7 +1358,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'grounding.step4': '嗅ぐことができる2つのものを名前付けてください',
     'grounding.step5': '今感じている1つの感情を名前付けてください',
     'grounding.progress': 'ステップ {{current}} / {{total}}',
-    'grounding.subtitle': '不安緩和のための5–34–33–32–31テクニック',
+    'grounding.subtitle': '不安を和らげるための5–4–3–2–1テクニック',
+    'grounding.instruction':
+    'このエクササイズは、意識を今この瞬間に戻すためのものです。一つずつ落ち着いて進み、周囲で気づいたことを書いてください。正しい答えや間違った答えはありません。',
     'grounding.completionTitle': 'あなたはグラウンディングされています。',
     'grounding.completionMessage': '今、どのように感じているかを観察してください。',
     'grounding.repeatExercise': '運動を繰り返す',
@@ -1373,6 +1400,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'settings.disclaimer': 'このアプリは感情的なサポートとリラックスを提供し、医療サービスではありません。',
     'settings.about': '概要',
     'settings.support': 'サポート',
+    'settings.legal': '法的情報',
+    'settings.privacyPolicy': 'プライバシーポリシー',
+    'settings.termsOfUse': '利用規約',
 
     // Premium
     'premium.title': 'プレミアム機能',

@@ -83,7 +83,7 @@ const getEnvironments = (t: (key: string) => string) => [
   },
 ];
 
-type ScreenState = "intro" | "select" | "visualization" | "relax" | "completion";
+type ScreenState = "intro" | "select" | "visualization" | "focus" | "relax" | "completion";
 
 export default function SafePlaceVisualizationScreen() {
   const { language, theme } = useAppContext();
@@ -96,17 +96,22 @@ export default function SafePlaceVisualizationScreen() {
   const environments = useMemo(() => getEnvironments(t), [t]);
 
   // Animation values
-  const contentOpacity = useSharedValue(0);
+  const contentOpacity = useSharedValue(1);
   const completionMessageOpacity = useSharedValue(0);
 
   useEffect(() => {
-    // Fade in content when screen changes
-    contentOpacity.value = 0;
-    contentOpacity.value = withTiming(1, {
-      duration: 600,
-      easing: Easing.inOut(Easing.ease),
-    });
-  }, [currentScreen]);
+  // Keep intro visible immediately; animate only the following screens
+  if (currentScreen === "intro") {
+    contentOpacity.value = 1;
+    return;
+  }
+
+  contentOpacity.value = 0;
+  contentOpacity.value = withTiming(1, {
+    duration: 600,
+    easing: Easing.inOut(Easing.ease),
+  });
+}, [currentScreen]);
 
   useEffect(() => {
     // Fade in completion message
@@ -142,12 +147,19 @@ export default function SafePlaceVisualizationScreen() {
     setCurrentScreen("visualization");
   };
 
-  const handleContinueToRelax = () => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    setCurrentScreen("relax");
-  };
+  const handleContinueToFocus = () => {
+  if (Platform.OS !== "web") {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }
+  setCurrentScreen("focus");
+};
+
+const handleContinueToRelax = () => {
+  if (Platform.OS !== "web") {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }
+  setCurrentScreen("relax");
+};
 
   const handleFinish = () => {
     if (Platform.OS !== "web") {
@@ -171,7 +183,7 @@ export default function SafePlaceVisualizationScreen() {
 
 
   const renderIntroScreen = () => (
-    <Animated.View style={animatedContentStyle} className="flex-1 justify-center items-center gap-6 px-6">
+    <View className="flex-1 justify-center items-center gap-6 px-6">
       <Text className="text-5xl">🌄</Text>
       <Text className="text-3xl font-bold text-foreground text-center">{t('safePlace.title')}</Text>
       <Text className="text-lg text-muted text-center leading-relaxed">
@@ -197,7 +209,7 @@ export default function SafePlaceVisualizationScreen() {
           <Text className="text-lg font-bold text-foreground">{t('safePlace.start')}</Text>
         </View>
       </Pressable>
-    </Animated.View>
+    </View>
   );
 
   const renderSelectScreen = () => (
@@ -273,7 +285,7 @@ export default function SafePlaceVisualizationScreen() {
           <Text className={theme === "dark" ? "text-lg text-white text-center leading-relaxed" : "text-lg text-foreground text-center leading-relaxed"}>{environment.guidedText}</Text>
         </View>
         <Pressable
-          onPress={handleContinueToRelax}
+          onPress={handleContinueToFocus}
           style={({ pressed }) => [
             {
               opacity: pressed ? 0.7 : 1,
@@ -295,7 +307,72 @@ export default function SafePlaceVisualizationScreen() {
       </Animated.View>
     );
   };
+  const renderFocusScreen = () => {
+  const environment = environments.find(
+    (e: EnvironmentOption) => e.id === selectedEnvironment
+  );
 
+  if (!environment) return null;
+
+  return (
+    <View style={{ flex: 1 }}>
+      <Image
+        source={{ uri: environment.imageUrl }}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: "100%",
+          height: "100%",
+        }}
+        resizeMode="cover"
+      />
+
+      <View
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 28,
+          alignItems: "center",
+        }}
+      >
+        <Pressable
+          onPress={handleContinueToRelax}
+          style={({ pressed }) => ({
+            width: 72,
+            height: 56,
+            borderRadius: 12,
+            justifyContent: "center",
+            alignItems: "center",
+            opacity: pressed ? 0.85 : 1,
+            transform: [{ scale: pressed ? 0.96 : 1 }],
+            backgroundColor:
+              theme === "dark"
+                ? "rgba(0, 217, 255, 0.18)"
+                : "rgba(255, 255, 255, 0.55)",
+            borderWidth: 1.5,
+            borderColor:
+              theme === "dark"
+                ? "rgba(0, 217, 255, 0.65)"
+                : "rgba(255, 255, 255, 0.80)",
+            shadowColor: "#000000",
+            shadowOpacity: 0.25,
+            shadowRadius: 8,
+            shadowOffset: { width: 0, height: 2 },
+            elevation: 5,
+          })}
+        >
+          <Text style={{ fontSize: 26 }}>
+            ▶️
+          </Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+};
   const renderRelaxScreen = () => (
     <Animated.View style={animatedContentStyle} className="flex-1 justify-center items-center px-6 gap-6">
       <Text className="text-5xl">🧘</Text>
@@ -379,14 +456,35 @@ export default function SafePlaceVisualizationScreen() {
       </View>
     </Animated.View>
   );
-
+if (currentScreen === "intro") {
+  return (
+    <ScreenContainer className="pt-24">
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="px-6 pb-20 flex-1">
+          {renderIntroScreen()}
+        </View>
+      </ScrollView>
+    </ScreenContainer>
+  );
+}
+if (currentScreen === "focus") {
+  return (
+    <ScreenContainer className="bg-background" edges={["top", "left", "right"]}>
+      {renderFocusScreen()}
+    </ScreenContainer>
+  );
+}
   return (
     <ScreenContainer className="pt-24">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
         <View className="px-6 pb-20">
-          {currentScreen === "intro" && renderIntroScreen()}
+          
           {currentScreen === "select" && renderSelectScreen()}
           {currentScreen === "visualization" && renderVisualizationScreen()}
+          
           {currentScreen === "relax" && renderRelaxScreen()}
           {currentScreen === "completion" && renderCompletionScreen()}
         </View>

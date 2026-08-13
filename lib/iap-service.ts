@@ -39,6 +39,7 @@ import {
 // ─── Internal State ───────────────────────────────────────────────────────────
 
 let _initialized = false;
+let _configured = false;
 let _currentOffering: PurchasesOffering | null = null;
 
 // ─── Initialization ───────────────────────────────────────────────────────────
@@ -74,6 +75,7 @@ export async function initializeIAP(): Promise<void> {
   try {
     Purchases.setLogLevel(LOG_LEVEL.ERROR); // Suppress verbose logs in production
     await Purchases.configure({ apiKey: REVENUECAT_API_KEY_IOS });
+    _configured = true;
     _initialized = true;
   } catch (error) {
     console.error("[IAP] Failed to initialize RevenueCat:", error);
@@ -106,6 +108,7 @@ export async function loadProducts(): Promise<IAPProducts> {
 
   if (Platform.OS !== "ios") return fallback;
   if (!_initialized) await initializeIAP();
+  if (!_configured) return fallback;
 
   try {
     const offerings = await Purchases.getOfferings();
@@ -184,6 +187,7 @@ function entitlementFromCustomerInfo(customerInfo: CustomerInfo): PremiumEntitle
 export async function checkEntitlement(): Promise<PremiumEntitlement> {
   if (Platform.OS !== "ios") return DEFAULT_ENTITLEMENT;
   if (!_initialized) await initializeIAP();
+  if (!_configured) return DEFAULT_ENTITLEMENT;
 
   try {
     const customerInfo = await Purchases.getCustomerInfo();
@@ -296,6 +300,9 @@ export function subscribeToEntitlementUpdates(
   if (Platform.OS !== "ios") {
     return () => {};
   }
+  if (!_configured) {
+  return () => {};
+}
 
   Purchases.addCustomerInfoUpdateListener((customerInfo) => {
     const entitlement = entitlementFromCustomerInfo(customerInfo);

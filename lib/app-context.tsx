@@ -3,7 +3,7 @@
  * Manages: theme, language, audio state, user session, premium status
  */
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Language, DEFAULT_LANGUAGE } from './i18n';
 
@@ -184,19 +184,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     ]);
   };
 
-  const setPremium = async (isPremium: boolean, expiresAt?: string) => {
+  const setPremium = useCallback(
+  async (isPremium: boolean, expiresAt?: string) => {
     setSessionState((prev) => ({
       ...prev,
       isPremium,
       premiumExpiresAt: expiresAt || null,
     }));
-    await AsyncStorage.setItem(STORAGE_KEYS.IS_PREMIUM, isPremium.toString());
+
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.IS_PREMIUM,
+      isPremium.toString()
+    );
+
     if (expiresAt) {
-      await AsyncStorage.setItem(STORAGE_KEYS.PREMIUM_EXPIRES_AT, expiresAt);
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.PREMIUM_EXPIRES_AT,
+        expiresAt
+      );
     } else {
-      await AsyncStorage.removeItem(STORAGE_KEYS.PREMIUM_EXPIRES_AT);
+      await AsyncStorage.removeItem(
+        STORAGE_KEYS.PREMIUM_EXPIRES_AT
+      );
     }
-  };
+  },
+  []
+);
 
   const value: AppContextType = {
     theme,

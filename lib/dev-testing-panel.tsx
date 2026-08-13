@@ -27,7 +27,12 @@ export interface DevTestingPanelProps {
 
 export function DevTestingPanel({ visible, onClose }: DevTestingPanelProps) {
   const { session, setPremium, resetMessageCount } = useAppContext();
-  const { messageCount, dailyMessageLimit, messagesRemainingToday } = useOpenAI();
+  const {
+  messageCount,
+  dailyMessageLimit,
+  messagesRemainingToday,
+  resetDailyMessageCount,
+} = useOpenAI();
   const colors = useColors();
   const [testLog, setTestLog] = useState<string[]>([]);
 
@@ -59,13 +64,17 @@ export function DevTestingPanel({ visible, onClose }: DevTestingPanelProps) {
   };
 
   const handleResetMessageCounter = async () => {
-    try {
-      await resetMessageCount();
-      addLog('✓ Message counter reset to 0');
-    } catch (error) {
-      addLog('✗ Failed to reset message counter');
-    }
-  };
+  try {
+    await Promise.all([
+      resetMessageCount(),
+      resetDailyMessageCount(),
+    ]);
+
+    addLog('✓ Message counter reset to 0');
+  } catch (error) {
+    addLog('✗ Failed to reset message counter');
+  }
+};
 
   const handleSimulateExpiration = async () => {
     try {

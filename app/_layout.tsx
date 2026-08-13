@@ -1,4 +1,4 @@
-import 'react-native-gesture-handler';
+﻿import 'react-native-gesture-handler';
 import "@/global.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -40,8 +40,8 @@ export const unstable_settings = {
  * 4. Render AppShell (which handles all system UI)
  * 
  * What it does NOT do:
- * - StatusBar configuration (delegated to AppShell → DynamicStatusBar)
- * - Screen rendering (delegated to AppShell → Stack)
+ * - StatusBar configuration (delegated to AppShell ΓåÆ DynamicStatusBar)
+ * - Screen rendering (delegated to AppShell ΓåÆ Stack)
  * - Content layout (delegated to screens)
  */
 

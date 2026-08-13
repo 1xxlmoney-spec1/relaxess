@@ -129,41 +129,71 @@ export default function MusicScreen() {
   const isPlaying = currentTrackId !== null && currentTrackId !== undefined;
 
   return (
-    <ScreenContainer key={`music-${theme}`} className="pt-24">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-        <View className="px-6 pb-20">
-          {/* Header */}
-          <View className="mb-8">
-            <Text className="text-4xl font-bold text-foreground mb-2">{t('music.title')}</Text>
-            <Text className="text-muted text-sm">{t('music.subtitle')}</Text>
-          </View>
+    <ScreenContainer
+  key={`music-${theme}`}
+  edges={["left", "right"]}
+  className="pt-0"
+>
+  {/* Fixed Header */}
+  <View
+  style={{
+    paddingTop: 52,
+    paddingHorizontal: 24,
+    paddingBottom: 16,
+    backgroundColor: "transparent",
+    zIndex: 10,
+  }}
+>
+  <View style={{ alignItems: "center" }}>
+    <Text className="text-2xl font-bold text-foreground">
+      {t("music.title")}
+    </Text>
 
-          {/* Tracks */}
-          <View className="gap-4">
-            {TRACKS.map((track) => (
-              <TrackCard
-                key={track.id}
-                track={track}
-                isPlaying={currentTrack?.id === track.id && isPlaying}
-                isPremiumUser={isPremium}
-                onPress={() => handleTrackPress(track)}
-                colors={colors}
-                currentTrackId={currentTrackId}
-                t={t}
-              />
-            ))}
-          </View>
+    <Text className="text-muted text-sm">
+      {t("music.subtitle")}
+    </Text>
+  </View>
+</View>
 
-          {/* Premium Information Section */}
-          {!isPremium && (
-            <View className="mt-12 mb-8 bg-primary/5 rounded-2xl p-6 border border-primary/20">
-              <Text className="text-sm text-foreground leading-relaxed">
-                {t('music.premiumInfo')}
-              </Text>
-            </View>
-          )}
+{/* Scrollable Content */}
+<ScrollView
+  style={{ flex: 1 }}
+  contentContainerStyle={{
+    paddingHorizontal: 24,
+    paddingBottom: 80,
+  }}
+  contentInsetAdjustmentBehavior="never"
+  automaticallyAdjustContentInsets={false}
+  showsVerticalScrollIndicator={false}
+>
+  
+    <View style={{ paddingTop: 16 }}>
+      {/* Tracks */}
+      <View className="gap-4">
+        {TRACKS.map((track) => (
+          <TrackCard
+            key={track.id}
+            track={track}
+            isPlaying={currentTrack?.id === track.id && isPlaying}
+            isPremiumUser={isPremium}
+            onPress={() => handleTrackPress(track)}
+            colors={colors}
+            currentTrackId={currentTrackId}
+            t={t}
+          />
+        ))}
+      </View>
+
+      {/* Premium Information Section */}
+      {!isPremium && (
+        <View className="mt-12 mb-8 bg-primary/5 rounded-2xl p-6 border border-primary/20">
+          <Text className="text-sm text-foreground leading-relaxed">
+            {t("music.premiumInfo")}
+          </Text>
         </View>
-      </ScrollView>
+      )}
+    </View>
+  </ScrollView>
     </ScreenContainer>
   );
 }

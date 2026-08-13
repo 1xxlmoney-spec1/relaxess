@@ -6,7 +6,7 @@ import { useRouter } from "expo-router";
 import { useColors } from "@/hooks/use-colors";
 import * as Haptics from "expo-haptics";
 import { useState, useEffect } from "react";
-import { ScrollView, View, Text, Pressable, KeyboardAvoidingView, Platform } from "react-native";
+import { ScrollView, View, Text, Pressable, KeyboardAvoidingView, Platform, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
   useSharedValue,
@@ -189,32 +189,32 @@ export default function BodyScanScreen() {
 
           {/* Completion Buttons */}
           <View className="gap-3">
-            <View className="flex-row gap-3">
-              <Pressable
-                onPress={handleRepeat}
-                style={({ pressed }) => ({
-                  flex: 1,
-                  opacity: pressed ? 0.9 : 1,
-                  transform: [{ scale: pressed ? 0.94 : 1 }],
+            <View className="flex-row justify-center gap-8">
+              <TouchableOpacity
+                 onPress={handleRepeat}
+                   activeOpacity={0.85}
+                     style={{
+                  width: 56,
+                  height: 56,
+                  
                   borderRadius: 12,
                   backgroundColor: theme === "dark"
-                    ? "rgba(0, 217, 255, 0.12)"
-                    : "rgba(10, 126, 164, 0.10)",
+                    ? "rgba(0, 217, 255, 0.16)"
+                    : "rgba(10, 126, 164, 0.12)",
                   borderWidth: 1.5,
                   borderColor: theme === "dark"
-                    ? "rgba(0, 217, 255, 0.40)"
-                    : "rgba(10, 126, 164, 0.35)",
+                    ? "rgba(0, 217, 255, 0.65)"
+                    : "rgba(10, 126, 164, 0.55)",
                   shadowColor: theme === "dark" ? "#00D9FF" : "#0a7ea4",
                   shadowOpacity: theme === "dark" ? 0.25 : 0.15,
                   shadowRadius: 8,
                   shadowOffset: { width: 0, height: 2 },
                   elevation: 4,
-                  paddingVertical: 12,
-                  paddingHorizontal: 24,
+                  
                   alignItems: "center",
                   justifyContent: "center",
-                })}
-              >
+                }}
+               >
                 <View
                   style={{
                     position: "absolute",
@@ -231,36 +231,36 @@ export default function BodyScanScreen() {
                     pointerEvents: "none",
                   }}
                 />
-                <Text style={{ fontSize: 16, fontWeight: "600", color: theme === "dark" ? "#FFFFFF" : colors.foreground, zIndex: 10 }}>
-                  {t('bodyScan.repeat')}
-                </Text>
-              </Pressable>
+                <Text style={{ fontSize: 26, fontWeight: "600", color: theme === "dark" ? "#FFFFFF" : colors.foreground, zIndex: 10 }}>
+                ↻
+               </Text>
+              </TouchableOpacity>
 
-              <Pressable
-                onPress={handleDone}
-                style={({ pressed }) => ({
-                  flex: 1,
-                  opacity: pressed ? 0.9 : 1,
-                  transform: [{ scale: pressed ? 0.94 : 1 }],
+               <TouchableOpacity
+                  onPress={handleDone}
+                  activeOpacity={0.85}
+                  style={{
+                  width: 56,
+                  height: 56,
+                  
                   borderRadius: 12,
                   backgroundColor: theme === "dark"
-                    ? "rgba(0, 217, 255, 0.12)"
-                    : "rgba(10, 126, 164, 0.10)",
+                    ? "rgba(0, 217, 255, 0.16)"
+                    : "rgba(10, 126, 164, 0.12)",
                   borderWidth: 1.5,
                   borderColor: theme === "dark"
-                    ? "rgba(0, 217, 255, 0.40)"
-                    : "rgba(10, 126, 164, 0.35)",
+                    ? "rgba(0, 217, 255, 0.65)"
+                    : "rgba(10, 126, 164, 0.55)",
                   shadowColor: theme === "dark" ? "#00D9FF" : "#0a7ea4",
                   shadowOpacity: theme === "dark" ? 0.25 : 0.15,
                   shadowRadius: 8,
                   shadowOffset: { width: 0, height: 2 },
                   elevation: 4,
-                  paddingVertical: 12,
-                  paddingHorizontal: 24,
+                  
                   alignItems: "center",
                   justifyContent: "center",
-                })}
-              >
+                 }}
+                >
                 <View
                   style={{
                     position: "absolute",
@@ -277,10 +277,10 @@ export default function BodyScanScreen() {
                     pointerEvents: "none",
                   }}
                 />
-                <Text style={{ fontSize: 16, fontWeight: "600", color: theme === "dark" ? "#FFFFFF" : colors.foreground, zIndex: 10 }}>
-                  {t('bodyScan.done')}
-                </Text>
-              </Pressable>
+                <Text style={{ fontSize: 26, fontWeight: "600", color: theme === "dark" ? "#FFFFFF" : colors.foreground, zIndex: 10 }}>
+                 ✓
+               </Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -296,6 +296,80 @@ export default function BodyScanScreen() {
         style={{ flex: 1 }}
       >
         <ScreenContainer className="bg-background" edges={["top", "left", "right"]}>
+{/* Header */}
+<View
+  style={{
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+    width: "100%",
+    paddingTop: 52,
+    paddingBottom: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor:
+      theme === "dark"
+        ? "rgba(255,255,255,0.10)"
+        : "rgba(10,126,164,0.12)",
+  }}
+>
+  <View
+    style={{
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "flex-end",
+    }}
+  >
+    <TouchableOpacity
+      onPress={handleExit}
+      style={{
+        width: 44,
+        height: 44,
+        borderRadius: 12,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor:
+          theme === "dark"
+            ? "rgba(0, 217, 255, 0.12)"
+            : "rgba(10, 126, 164, 0.10)",
+        borderWidth: 1.5,
+        borderColor:
+          theme === "dark"
+            ? "rgba(0, 217, 255, 0.40)"
+            : "rgba(10, 126, 164, 0.35)",
+        shadowColor: theme === "dark" ? "#00D9FF" : "#0a7ea4",
+        shadowOpacity: theme === "dark" ? 0.25 : 0.15,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 2 },
+        elevation: 4,
+      }}
+    >
+      <View
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "40%",
+          backgroundColor:
+            theme === "dark"
+              ? "rgba(255, 255, 255, 0.04)"
+              : "rgba(255, 255, 255, 0.25)",
+          borderBottomLeftRadius: 20,
+          borderBottomRightRadius: 20,
+          opacity: 0.6,
+          pointerEvents: "none",
+        }}
+      />
+
+      <Text style={{ fontSize: 22, lineHeight: 26, zIndex: 10 }}>
+        ❌
+      </Text>
+    </TouchableOpacity>
+  </View>
+</View>
           <View className="flex-1 justify-between px-6 py-8">
             {/* Header */}
             <View className="gap-2 pt-24">
@@ -353,57 +427,15 @@ export default function BodyScanScreen() {
 
             {/* Navigation Buttons */}
             <View className="gap-3">
-              <View className="flex-row gap-3">
-                <Pressable
-                  onPress={handleExit}
-                  style={({ pressed }) => ({
-                    flex: 1,
-                    opacity: pressed ? 0.9 : 1,
-                    transform: [{ scale: pressed ? 0.94 : 1 }],
-                    borderRadius: 12,
-                    backgroundColor: theme === "dark"
-                      ? "rgba(0, 217, 255, 0.12)"
-                      : "rgba(10, 126, 164, 0.10)",
-                    borderWidth: 1.5,
-                    borderColor: theme === "dark"
-                      ? "rgba(0, 217, 255, 0.40)"
-                      : "rgba(10, 126, 164, 0.35)",
-                    shadowColor: theme === "dark" ? "#00D9FF" : "#0a7ea4",
-                    shadowOpacity: theme === "dark" ? 0.25 : 0.15,
-                    shadowRadius: 8,
-                    shadowOffset: { width: 0, height: 2 },
-                    elevation: 4,
-                    paddingVertical: 12,
-                    paddingHorizontal: 24,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  })}
-                >
-                  <View
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: "40%",
-                      backgroundColor: theme === "dark"
-                        ? "rgba(255, 255, 255, 0.04)"
-                        : "rgba(255, 255, 255, 0.25)",
-                      borderBottomLeftRadius: 12,
-                      borderBottomRightRadius: 12,
-                      opacity: 0.6,
-                      pointerEvents: "none",
-                    }}
-                  />
-                  <Text style={{ fontSize: 16, fontWeight: "600", color: theme === "dark" ? "#FFFFFF" : colors.foreground, zIndex: 10 }}>
-                    {t('common.back')}
-                  </Text>
-                </Pressable>
+              <View className="flex-row justify-center">
+                
 
                 <Pressable
-                  onPress={handleStart}
-                  style={({ pressed }) => ({
-                    flex: 1,
+                   onPress={handleStart}
+                   style={({ pressed }) => ({
+                    width: 72,
+                    height: 56,
+                    alignSelf: "center",
                     opacity: pressed ? 0.9 : 1,
                     transform: [{ scale: pressed ? 0.94 : 1 }],
                     borderRadius: 12,
@@ -441,8 +473,8 @@ export default function BodyScanScreen() {
                       pointerEvents: "none",
                     }}
                   />
-                  <Text style={{ fontSize: 16, fontWeight: "600", color: theme === "dark" ? "#FFFFFF" : colors.foreground, zIndex: 10 }}>
-                    {t('common.start')}
+                  <Text style={{ fontSize: 24, zIndex: 10 }}>
+                    ▶️
                   </Text>
                 </Pressable>
               </View>
@@ -460,12 +492,87 @@ export default function BodyScanScreen() {
       style={{ flex: 1 }}
     >
       <ScreenContainer className="bg-background" edges={["top", "left", "right"]}>
+       {/* Exit Header */}
+<View
+  style={{
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+    width: "100%",
+    paddingTop: 52,
+    paddingBottom: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor:
+      theme === "dark"
+        ? "rgba(255,255,255,0.10)"
+        : "rgba(10,126,164,0.12)",
+  }}
+>
+  <View
+    style={{
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "flex-end",
+    }}
+  >
+    <TouchableOpacity
+      onPress={handleExit}
+      style={{
+        width: 44,
+        height: 44,
+        borderRadius: 12,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor:
+          theme === "dark"
+            ? "rgba(0, 217, 255, 0.12)"
+            : "rgba(10, 126, 164, 0.10)",
+        borderWidth: 1.5,
+        borderColor:
+          theme === "dark"
+            ? "rgba(0, 217, 255, 0.40)"
+            : "rgba(10, 126, 164, 0.35)",
+        shadowColor: theme === "dark" ? "#00D9FF" : "#0a7ea4",
+        shadowOpacity: theme === "dark" ? 0.25 : 0.15,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 2 },
+        elevation: 4,
+      }}
+    >
+      <View
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "40%",
+          backgroundColor:
+            theme === "dark"
+              ? "rgba(255, 255, 255, 0.04)"
+              : "rgba(255, 255, 255, 0.25)",
+          borderBottomLeftRadius: 20,
+          borderBottomRightRadius: 20,
+          opacity: 0.6,
+          pointerEvents: "none",
+        }}
+      />
+
+      <Text style={{ fontSize: 22, lineHeight: 26, zIndex: 10 }}>
+        ❌
+      </Text>
+    </TouchableOpacity>
+  </View>
+</View>
         <ScrollView
           className="flex-1"
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ flexGrow: 1 }}
         >
           <View className="flex-1 justify-between px-6 py-8">
+           
             {/* Header */}
             <View className="gap-2 pt-24">
               <Text className="text-3xl font-bold text-foreground">
@@ -498,7 +605,16 @@ export default function BodyScanScreen() {
               {currentStep && (
                 <>
                   <View className="items-center gap-4">
-                    <Text className="text-6xl">{currentStep.icon}</Text>
+                    <Text
+                  className="text-6xl"
+                  style={{
+                    lineHeight: 76,
+                    paddingTop: 6,
+                    overflow: "visible",
+                  }}
+                >
+                   {currentStep.icon}
+                 </Text>
                     <Text className="text-2xl font-bold text-foreground text-center">
                       {t(currentStep.titleKey)}
                     </Text>
@@ -518,57 +634,15 @@ export default function BodyScanScreen() {
 
             {/* Navigation Buttons */}
             <View className="gap-3">
-              <View className="flex-row gap-3">
-                <Pressable
-                  onPress={handleExit}
-                  style={({ pressed }) => ({
-                    flex: 1,
-                    opacity: pressed ? 0.9 : 1,
-                    transform: [{ scale: pressed ? 0.94 : 1 }],
-                    borderRadius: 12,
-                    backgroundColor: theme === "dark"
-                      ? "rgba(0, 217, 255, 0.12)"
-                      : "rgba(10, 126, 164, 0.10)",
-                    borderWidth: 1.5,
-                    borderColor: theme === "dark"
-                      ? "rgba(0, 217, 255, 0.40)"
-                      : "rgba(10, 126, 164, 0.35)",
-                    shadowColor: theme === "dark" ? "#00D9FF" : "#0a7ea4",
-                    shadowOpacity: theme === "dark" ? 0.25 : 0.15,
-                    shadowRadius: 8,
-                    shadowOffset: { width: 0, height: 2 },
-                    elevation: 4,
-                    paddingVertical: 12,
-                    paddingHorizontal: 24,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  })}
-                >
-                  <View
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: "40%",
-                      backgroundColor: theme === "dark"
-                        ? "rgba(255, 255, 255, 0.04)"
-                        : "rgba(255, 255, 255, 0.25)",
-                      borderBottomLeftRadius: 12,
-                      borderBottomRightRadius: 12,
-                      opacity: 0.6,
-                      pointerEvents: "none",
-                    }}
-                  />
-                  <Text style={{ fontSize: 16, fontWeight: "600", color: theme === "dark" ? "#FFFFFF" : colors.foreground, zIndex: 10 }}>
-                    {t('common.back')}
-                  </Text>
-                </Pressable>
+              <View className="flex-row justify-center">
+                
 
                 <Pressable
                   onPress={handleNext}
                   style={({ pressed }) => ({
-                    flex: 1,
+                    width: 72,
+                    height: 56,
+                    alignSelf: "center",
                     opacity: pressed ? 0.9 : 1,
                     transform: [{ scale: pressed ? 0.94 : 1 }],
                     borderRadius: 12,
@@ -606,10 +680,8 @@ export default function BodyScanScreen() {
                       pointerEvents: "none",
                     }}
                   />
-                  <Text style={{ fontSize: 16, fontWeight: "600", color: theme === "dark" ? "#FFFFFF" : colors.foreground, zIndex: 10 }}>
-                    {currentStepIndex === BODY_SCAN_STEPS.length - 1
-                      ? t('bodyScan.finish')
-                      : t('common.next')}
+                  <Text style={{ fontSize: 24, zIndex: 10 }}>
+                     ➡️
                   </Text>
                 </Pressable>
               </View>

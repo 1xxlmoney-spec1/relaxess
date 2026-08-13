@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Platform, Animated } from "react-native";
+import { View, Text, Pressable, Platform, Animated, TouchableOpacity } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAppContext } from "@/lib/app-context";
 import { useTranslation } from "@/lib/i18n";
@@ -54,7 +54,81 @@ export default function QuietModeScreen() {
 
   return (
     <View style={{ flex: 1 }}>
+      
       <ScreenContainer className="bg-background items-center justify-center">
+      {/* Header */}
+      <View
+        style={{
+          width: "100%",
+          paddingTop: 52,
+          paddingBottom: 12,
+          paddingHorizontal: 16,
+          borderBottomWidth: 1,
+          borderBottomColor:
+            theme === "dark"
+              ? "rgba(255,255,255,0.10)"
+              : "rgba(10,126,164,0.12)",
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "flex-end",
+          }}
+        >
+          
+
+          
+
+          <TouchableOpacity
+  onPress={handleExit}
+  style={{
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor:
+      theme === "dark"
+        ? "rgba(0, 217, 255, 0.12)"
+        : "rgba(10, 126, 164, 0.10)",
+    borderWidth: 1.5,
+    borderColor:
+      theme === "dark"
+        ? "rgba(0, 217, 255, 0.40)"
+        : "rgba(10, 126, 164, 0.35)",
+    shadowColor: theme === "dark" ? "#00D9FF" : "#0a7ea4",
+    shadowOpacity: theme === "dark" ? 0.25 : 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  }}
+>
+  <View
+    style={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      height: "40%",
+      backgroundColor:
+        theme === "dark"
+          ? "rgba(255, 255, 255, 0.04)"
+          : "rgba(255, 255, 255, 0.25)",
+      borderBottomLeftRadius: 20,
+      borderBottomRightRadius: 20,
+      opacity: 0.6,
+      pointerEvents: "none",
+    }}
+  />
+
+  <Text style={{ fontSize: 22, lineHeight: 26, zIndex: 10 }}>
+    ❌
+  </Text>
+</TouchableOpacity>
+        </View>
+      </View>
         {/* Background Animation */}
         <View className="absolute inset-0 flex-1 items-center justify-center">
           <Animated.View
@@ -159,51 +233,7 @@ export default function QuietModeScreen() {
               </View>
             )}
 
-            {/* Exit Button */}
-            <Pressable
-              onPress={handleExit}
-              style={({ pressed }) => ({
-                opacity: pressed ? 0.9 : 1,
-                transform: [{ scale: pressed ? 0.94 : 1 }],
-                borderRadius: 12,
-                backgroundColor: theme === "dark"
-                  ? "rgba(0, 217, 255, 0.12)"
-                  : "rgba(10, 126, 164, 0.10)",
-                borderWidth: 1.5,
-                borderColor: theme === "dark"
-                  ? "rgba(0, 217, 255, 0.40)"
-                  : "rgba(10, 126, 164, 0.35)",
-                shadowColor: theme === "dark" ? "#00D9FF" : "#0a7ea4",
-                shadowOpacity: theme === "dark" ? 0.25 : 0.15,
-                shadowRadius: 8,
-                shadowOffset: { width: 0, height: 2 },
-                elevation: 4,
-                paddingVertical: 12,
-                paddingHorizontal: 24,
-                alignItems: "center",
-                justifyContent: "center",
-              })}
-            >
-              <View
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: "40%",
-                  backgroundColor: theme === "dark"
-                    ? "rgba(255, 255, 255, 0.04)"
-                    : "rgba(255, 255, 255, 0.25)",
-                  borderBottomLeftRadius: 12,
-                  borderBottomRightRadius: 12,
-                  opacity: 0.6,
-                  pointerEvents: "none",
-                }}
-              />
-              <Text style={{ fontSize: 16, fontWeight: "600", color: theme === "dark" ? "#FFFFFF" : colors.foreground, zIndex: 10 }}>
-                {t("common.close")}
-              </Text>
-            </Pressable>
+            
         </View>
       </ScreenContainer>
     </View>

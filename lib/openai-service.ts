@@ -233,7 +233,7 @@ export class OpenAIClient {
 
       // Call server endpoint (which proxies to LLM service)
       try {
-        const response = await this.serverClient.post('/chat', {
+        const response = await this.serverClient.post('/api/chat', {
           messages: messageHistory,
           maxTokens: maxTokens,
         });

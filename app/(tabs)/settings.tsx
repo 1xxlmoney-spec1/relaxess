@@ -106,17 +106,40 @@ export default function SettingsTabScreen() {
   };
 
   return (
-    <ScreenContainer className="bg-background">
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        showsVerticalScrollIndicator={false}
-        scrollEventThrottle={16}
-      >
-        <View className="flex-1 px-6 py-8">
-          {/* Header */}
-          <Text className="text-3xl font-bold text-foreground mb-8 pt-4">
-            {t("settings.title")}
-          </Text>
+  <ScreenContainer
+    edges={["left", "right"]}
+    className="pt-0 bg-background"
+  >
+    {/* Fixed Header */}
+    <View
+      style={{
+        paddingTop: 52,
+        paddingHorizontal: 24,
+        paddingBottom: 16,
+        backgroundColor: "transparent",
+        zIndex: 10,
+        alignItems: "center",
+      }}
+    >
+      <Text className="text-2xl font-bold text-foreground">
+        {t("settings.title")}
+      </Text>
+    </View>
+
+    {/* Scrollable Content */}
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={{
+        paddingHorizontal: 24,
+        paddingTop: 16,
+        paddingBottom: 80,
+      }}
+      contentInsetAdjustmentBehavior="never"
+      automaticallyAdjustContentInsets={false}
+      showsVerticalScrollIndicator={false}
+    >
+      <View className="flex-1">
+          
 
           {/* Theme Section */}
           <View className="gap-4 mb-8">
@@ -374,7 +397,7 @@ export default function SettingsTabScreen() {
                         textDecorationLine: "underline",
                       }}
                     >
-                      Privacy Policy
+                      {t("settings.privacyPolicy")}
                     </Text>
                   </Pressable>
                   <Pressable
@@ -393,7 +416,7 @@ export default function SettingsTabScreen() {
                         textDecorationLine: "underline",
                       }}
                     >
-                      Terms of Use
+                      {t("settings.termsOfUse")}
                     </Text>
                   </Pressable>
                 </View>
@@ -404,7 +427,7 @@ export default function SettingsTabScreen() {
           {/* Legal Section */}
           <View className="gap-4 mb-8">
             <Text className="text-sm font-semibold text-muted uppercase">
-              Legal
+              {t("settings.legal")}
             </Text>
             <View className="gap-2">
               {/* Privacy Policy row */}
@@ -427,7 +450,7 @@ export default function SettingsTabScreen() {
                   }}
                   className="py-3 px-4 rounded-xl border flex-row justify-between items-center"
                 >
-                  <Text className="text-foreground font-medium">Privacy Policy</Text>
+                  <Text className="text-foreground font-medium">{t("settings.privacyPolicy")}</Text>
                   <Text className="text-muted text-base">›</Text>
                 </View>
               </Pressable>
@@ -452,7 +475,7 @@ export default function SettingsTabScreen() {
                   }}
                   className="py-3 px-4 rounded-xl border flex-row justify-between items-center"
                 >
-                  <Text className="text-foreground font-medium">Terms of Use</Text>
+                  <Text className="text-foreground font-medium">{t("settings.termsOfUse")}</Text>
                   <Text className="text-muted text-base">›</Text>
                 </View>
               </Pressable>

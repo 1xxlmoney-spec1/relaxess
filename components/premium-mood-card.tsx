@@ -16,11 +16,11 @@ export function PremiumMoodCard({ isSelected, onPress, label, emoji }: PremiumMo
     <Pressable
       onPress={onPress}
       onLayout={({ nativeEvent }) => console.log("LAYOUT PremiumMoodCard Pressable", nativeEvent.layout)}
-      style={({ pressed }) => ({
-        flex: 1,
-        opacity: pressed ? 0.85 : 1,
-        transform: [{ scale: pressed ? 0.96 : 1 }],
-      })}
+      style={{
+  flex: 1,
+  alignSelf: "stretch",
+  width: "100%",
+}}
     >
       <View
         onLayout={({ nativeEvent }) => console.log("LAYOUT PremiumMoodCard InnerView", nativeEvent.layout)}

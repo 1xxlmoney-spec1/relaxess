@@ -76,8 +76,8 @@ function EmojiTabIcon({ emoji, isActive }: { emoji: string; isActive: boolean })
 export default function TabLayout() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const bottomPadding = Platform.OS === "web" ? 12 : Math.max(insets.bottom, 8);
-  const tabBarHeight = 56 + bottomPadding;
+  const bottomPadding = Platform.OS === "web" ? 12 : 8;
+  const tabBarHeight = 56;
 
   return (
     <Tabs

@@ -1,4 +1,4 @@
-import { Text, View, Platform, Pressable } from "react-native";
+﻿import { Text, View, Platform, Pressable } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAppContext } from "@/lib/app-context";
 import { useTranslation } from "@/lib/i18n";
@@ -53,20 +53,24 @@ export default function HomeScreen() {
   return (
     <AnimatedGradientBg>
       <ScreenContainer
+        edges={["left", "right"]}
         className={theme === "dark" ? "" : "bg-transparent"}
       >
         <View
-          style={{ flex: 1, flexDirection: "column", paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 }}
-        >
+  onLayout={({ nativeEvent }) =>
+    console.log("LAYOUT Home RootView", nativeEvent.layout)
+  }
+  style={{ flex: 1, flexDirection: "column", paddingHorizontal: 16, paddingTop: 40, paddingBottom: 2 }}
+>
 
-        {/* Header row — theme toggle + Relaxess title, positioned lower */}
+        {/* Header row ΓÇö theme toggle + Relaxess title, positioned lower */}
         <View style={{
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
           height: 48,
           marginBottom: 10,
-          marginTop: 14,
+          marginTop: 2,
         }}>
           <Pressable
             onPress={handleThemeToggle}
@@ -122,23 +126,32 @@ export default function HomeScreen() {
           <View style={{ height: 3, width: 36, backgroundColor: colors.primary, borderRadius: 2, marginTop: 4 }} />
         </View>
 
-        {/* Mood Grid — 2x3, rectangular cards, fixed height per row */}
+        {/* Mood Grid ΓÇö 2x3, rectangular cards, fixed height per row */}
         <View
+          onLayout={({ nativeEvent }) =>
+          console.log("LAYOUT Home MoodGrid", nativeEvent.layout)
+        }
           style={{ flex: 1, gap: 8, marginBottom: 10, minHeight: 0 }}
-        >
+           >
           {[
-            ["anxiety", "😰", "stress", "😔"],
-            ["overthinking", "🤔", "sleep", "😴"],
-            ["sadness", "😢", "relax", "🧘"],
-          ].map(([id1, emoji1, id2, emoji2]) => (
+           ["anxiety", "😰", "stress", "😔"],
+           ["overthinking", "🤔", "sleep", "😴"],
+           ["sadness", "😢", "relax", "🧘"],
+           ].map(([id1, emoji1, id2, emoji2]) => (
             <View
               key={id1}
+              onLayout={({ nativeEvent }) =>
+              console.log("LAYOUT Home MoodRow", id1, nativeEvent.layout)
+        }
               style={{ flex: 1, flexDirection: "row", gap: 8 }}
-            >
+        >
               <View
-                style={{ flex: 1 }}
-              >
-                <PremiumMoodCard
+                onLayout={({ nativeEvent }) =>
+                console.log("LAYOUT Home CardWrapper", id1, nativeEvent.layout)
+        }
+                style={{ flex: 1, alignSelf: "stretch" }}
+>
+              <PremiumMoodCard
                   isSelected={selectedMood === id1}
                   onPress={() => handleMoodSelect(id1)}
                   label={t(`home.mood.${id1}`)}
@@ -146,9 +159,12 @@ export default function HomeScreen() {
                 />
               </View>
               <View
-                style={{ flex: 1 }}
-              >
-                <PremiumMoodCard
+                  onLayout={({ nativeEvent }) =>
+                  console.log("LAYOUT Home CardWrapper", id2, nativeEvent.layout)
+        }
+                  style={{ flex: 1, alignSelf: "stretch" }}
+        >
+              <PremiumMoodCard
                   isSelected={selectedMood === id2}
                   onPress={() => handleMoodSelect(id2)}
                   label={t(`home.mood.${id2}`)}
@@ -159,8 +175,8 @@ export default function HomeScreen() {
           ))}
         </View>
 
-        {/* Buttons — fixed at bottom, not flex */}
-        <View style={{ gap: 7, flexShrink: 0 }}>
+        {/* Buttons ΓÇö fixed at bottom, not flex */}
+        <View style={{ gap: 3, flexShrink: 0 }}>
           {/* Start Session Button with Glow Effect */}
           <View style={{ position: "relative" }}>
             {selectedMood && (
@@ -178,21 +194,22 @@ export default function HomeScreen() {
             <Pressable
               onPress={handleStartSession}
               disabled={!selectedMood}
-              style={({ pressed }) => ({
-                opacity: !selectedMood ? 0.45 : pressed ? 0.88 : 1,
-                transform: [{ scale: pressed ? 0.97 : 1 }],
-                backgroundColor: colors.primary,
-                borderRadius: 28,
-                paddingVertical: 13,
-                alignItems: "center",
-                ...(selectedMood && {
+                style={{
+                  opacity: selectedMood ? 1 : 0.45,
+                  backgroundColor: colors.primary,
+                  borderRadius: 28,
+                  paddingVertical: 13,
+                  alignItems: "center",
+                  minHeight: 48,
+                  justifyContent: "center",
+                  ...(selectedMood && {
                   shadowColor: colors.primary,
                   shadowOpacity: 0.4,
                   shadowRadius: 12,
                   shadowOffset: { width: 0, height: 6 },
                   elevation: 8,
                 }),
-              })}
+            }}
             >
               <Text style={{ fontSize: 16, fontWeight: "700", color: "#fff" }}>
                 {t("home.startSession")}
@@ -200,28 +217,28 @@ export default function HomeScreen() {
             </Pressable>
           </View>
 
-          {/* Relaxation Tools Button — same glass style as mood cards */}
+          {/* Relaxation Tools Button ΓÇö same glass style as mood cards */}
           <Pressable
             onPress={handleRelaxationTools}
-            style={({ pressed }) => ({
-              opacity: pressed ? 0.85 : 1,
-              transform: [{ scale: pressed ? 0.96 : 1 }],
-              backgroundColor: isDark
-                ? "rgba(255, 255, 255, 0.08)"
-                : "rgba(255, 255, 255, 0.60)",
-              borderRadius: 18,
-              borderWidth: 1.5,
-              borderColor: isDark
-                ? "rgba(255, 255, 255, 0.15)"
-                : "rgba(255, 255, 255, 0.50)",
-              paddingVertical: 12,
-              alignItems: "center",
-              shadowColor: "#000000",
-              shadowOpacity: isDark ? 0.15 : 0.08,
-              shadowRadius: isDark ? 6 : 4,
-              shadowOffset: { width: 0, height: 2 },
-              elevation: isDark ? 2 : 1,
-            })}
+               style={{
+                 backgroundColor: isDark
+                  ? "rgba(255, 255, 255, 0.08)"
+                  : "rgba(255, 255, 255, 0.60)",
+                 borderRadius: 18,
+                 borderWidth: 1.5,
+                 borderColor: isDark
+                  ? "rgba(255, 255, 255, 0.15)"
+                  : "rgba(255, 255, 255, 0.50)",
+                 paddingVertical: 12,
+                 minHeight: 48,
+                 alignItems: "center",
+                 justifyContent: "center",
+                 shadowColor: "#000000",
+                 shadowOpacity: isDark ? 0.15 : 0.08,
+                 shadowRadius: isDark ? 6 : 4,
+                 shadowOffset: { width: 0, height: 2 },
+                 elevation: isDark ? 2 : 1,
+            }}
           >
             {/* Glass highlight */}
             <View
