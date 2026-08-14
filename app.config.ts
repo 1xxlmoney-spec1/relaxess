@@ -1,4 +1,4 @@
-﻿// Load environment variables with proper priority (system > .env)
+// Load environment variables with proper priority (system > .env)
 import "./scripts/load-env.js";
 import type { ExpoConfig } from "expo/config";
 
@@ -97,6 +97,7 @@ const config: ExpoConfig = {
       "expo-audio",
       {
         microphonePermission: "Allow $(PRODUCT_NAME) to access your microphone.",
+        enableBackgroundPlayback: true,
       },
     ],
     [
@@ -135,4 +136,5 @@ const config: ExpoConfig = {
 };
 
 export default config;
+
 

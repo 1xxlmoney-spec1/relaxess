@@ -91,6 +91,7 @@ if (currentAudio) {
 try {
   await setAudioModeAsync({
     playsInSilentMode: true,
+    shouldPlayInBackground: true,
   });
 
   currentAudio = createAudioPlayer(url);
@@ -222,3 +223,6 @@ export async function getRemainingListeningSeconds(trackId: string, isPremium: b
   const listeningSeconds = await getListeningSecondsForToday(trackId as any);
   return Math.max(0, DAILY_LIMIT_SECONDS - listeningSeconds);
 }
+
+
+

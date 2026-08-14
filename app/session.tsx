@@ -69,6 +69,7 @@ export default function SessionScreen() {
         await setAudioModeAsync({
           allowsRecording: true,
           playsInSilentMode: true,
+          shouldPlayInBackground: true,
         });
       } catch (error) {
         console.error("Failed to initialize audio:", error);
@@ -545,4 +546,5 @@ export default function SessionScreen() {
   </KeyboardAvoidingView>
   );
 }
+
 
