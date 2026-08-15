@@ -1,11 +1,11 @@
-﻿/**
- * Relaxess â€“ Centralized In-App Purchase Configuration
+/**
+ * Relaxess – Centralized In-App Purchase Configuration
  *
  * IMPORTANT: These product identifiers MUST be created in App Store Connect
  * under your app's "Subscriptions" section before live purchases will work.
  *
  * Steps in App Store Connect:
- *  1. Go to App Store Connect â†’ Your App â†’ Subscriptions
+ *  1. Go to App Store Connect → Your App → Subscriptions
  *  2. Create a Subscription Group (e.g., "Relaxess Premium")
  *  3. Create two Auto-Renewable Subscriptions with these exact Product IDs:
  *       - relaxess.premium.monthly.v2   (duration: 1 month, price: $2.99)
@@ -18,10 +18,10 @@
  *  3. Add the product identifiers above to your RevenueCat Entitlements
  *  4. Create an Entitlement named "premium" and attach both products to it
  *  5. Replace REVENUECAT_API_KEY_IOS below with your RevenueCat iOS API key
- *     (found in RevenueCat Dashboard â†’ Project Settings â†’ API Keys â†’ Public app-specific keys)
+ *     (found in RevenueCat Dashboard → Project Settings → API Keys → Public app-specific keys)
  */
 
-// â”€â”€â”€ Product Identifiers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Product Identifiers ─────────────────────────────────────────────────────
 // These must exactly match the Product IDs created in App Store Connect.
 
 export const IAP_PRODUCT_IDS = {
@@ -31,23 +31,23 @@ export const IAP_PRODUCT_IDS = {
 
 export type IAPProductId = (typeof IAP_PRODUCT_IDS)[keyof typeof IAP_PRODUCT_IDS];
 
-// â”€â”€â”€ RevenueCat Entitlement â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── RevenueCat Entitlement ───────────────────────────────────────────────────
 // The entitlement identifier configured in RevenueCat Dashboard.
-// Must match exactly what you create in RevenueCat â†’ Entitlements.
+// Must match exactly what you create in RevenueCat → Entitlements.
 
 export const REVENUECAT_ENTITLEMENT_ID = "premium";
 
-// â”€â”€â”€ RevenueCat API Key â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── RevenueCat API Key ───────────────────────────────────────────────────────
 // Replace this placeholder with your actual RevenueCat iOS Public API Key.
 // NEVER use a secret key here. Use only the Public app-specific key.
 // Format: appl_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 //
 // TODO: Replace with your actual RevenueCat iOS Public API Key from
-//       https://app.revenuecat.com â†’ Project Settings â†’ API Keys
+//       https://app.revenuecat.com → Project Settings → API Keys
 
-export const REVENUECAT_API_KEY_IOS = "REPLACE_WITH_YOUR_REVENUECAT_IOS_API_KEY";
+export const REVENUECAT_API_KEY_IOS = "appl_vFVnfeKAKfBPEIRsluJBiROGXHr";
 
-// â”€â”€â”€ Premium State Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Premium State Types ──────────────────────────────────────────────────────
 
 export type PremiumStatus =
   | "loading"         // Initial state while checking entitlements
@@ -71,4 +71,5 @@ export const DEFAULT_ENTITLEMENT: PremiumEntitlement = {
   productId: null,
   isActive: false,
 };
+
 

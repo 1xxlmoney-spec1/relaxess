@@ -61,8 +61,8 @@ export async function initializeIAP(): Promise<void> {
   // Validate API key is configured
   if (
     !REVENUECAT_API_KEY_IOS ||
-    REVENUECAT_API_KEY_IOS === "REPLACE_WITH_YOUR_REVENUECAT_IOS_API_KEY"
-  ) {
+    !REVENUECAT_API_KEY_IOS.startsWith("appl_")
+  )   {
     console.warn(
       "[IAP] RevenueCat API key not configured. " +
       "Set REVENUECAT_API_KEY_IOS in lib/iap-config.ts. " +
