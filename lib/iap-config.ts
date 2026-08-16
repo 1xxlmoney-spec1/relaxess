@@ -35,7 +35,7 @@ export type IAPProductId = (typeof IAP_PRODUCT_IDS)[keyof typeof IAP_PRODUCT_IDS
 // The entitlement identifier configured in RevenueCat Dashboard.
 // Must match exactly what you create in RevenueCat → Entitlements.
 
-export const REVENUECAT_ENTITLEMENT_ID = "premium";
+export const REVENUECAT_ENTITLEMENT_ID = "Relaxess Premium";
 
 // ─── RevenueCat API Key ───────────────────────────────────────────────────────
 // Replace this placeholder with your actual RevenueCat iOS Public API Key.
