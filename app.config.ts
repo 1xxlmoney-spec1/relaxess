@@ -96,7 +96,7 @@ const config: ExpoConfig = {
     [
       "expo-audio",
       {
-        microphonePermission: "Allow $(PRODUCT_NAME) to access your microphone.",
+        microphonePermission: "Relaxess uses the microphone when you choose voice input during a conversation, so your speech can be converted to text and used to provide a response.",
         enableBackgroundPlayback: true,
       },
     ],
